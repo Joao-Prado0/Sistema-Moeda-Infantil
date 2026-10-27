@@ -1,9 +1,25 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  Building2,
+  Check,
+  CircleAlert,
+  Hash,
+  KeyRound,
+  LoaderCircle,
+  Lock,
+  Mail,
+  Store,
+} from 'lucide-react';
 import { empresaApi } from '../services/api';
+import { useToast } from '../context/ToastContext';
+import { Field, PasswordField, PasswordMatch, PasswordStrength } from '../components/Field';
+import { mascaras } from '../utils/formatters';
 
 export default function CadastroEmpresaPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -17,7 +33,7 @@ export default function CadastroEmpresaPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: name === 'cnpj' ? mascaras.cnpj(value) : value }));
   };
 
   const handleSubmit = async (e) => {
@@ -38,7 +54,7 @@ export default function CadastroEmpresaPage() {
         senha: formData.senha,
       });
 
-      alert('Empresa parceira cadastrada com sucesso!');
+      toast.sucesso('Empresa parceira cadastrada com sucesso! Agora é só entrar.');
       navigate('/login');
     } catch (err) {
       setError(err.message || 'Erro ao cadastrar empresa parceira.');
@@ -48,84 +64,119 @@ export default function CadastroEmpresaPage() {
   };
 
   return (
-    <div className="center-container">
-      <div className="card card-form" style={{ maxWidth: '540px' }}>
-        <h2>Cadastro de empresa parceira</h2>
-        <p className="card-subtitle">Depois do cadastro você poderá cadastrar as vantagens oferecidas.</p>
+    <div className="page page-form page-form-sm">
+      <Link to="/login" className="back-link">
+        <ArrowLeft size={16} /> Voltar para o login
+      </Link>
 
-        {error && <div className="alert-error">{error}</div>}
+      <div className="card form-card reveal">
+        <header className="form-card-header">
+          <span className="icon-badge icon-badge-gold icon-badge-lg">
+            <Store size={26} />
+          </span>
+          <div>
+            <h1>Seja uma empresa parceira</h1>
+            <p>Depois do cadastro você poderá cadastrar as vantagens oferecidas aos estudantes.</p>
+          </div>
+        </header>
+
+        {error && (
+          <div key={error} className="alert alert-error" role="alert">
+            <CircleAlert size={18} />
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Nome fantasia</label>
-            <input
-              type="text"
-              name="nomeFantasia"
-              placeholder="Restaurante Universitário"
-              value={formData.nomeFantasia}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label>CNPJ</label>
-              <input
-                type="text"
+          <section className="form-section">
+            <h2 className="form-section-title">
+              <Building2 size={18} /> Dados da empresa
+            </h2>
+            <div className="form-grid">
+              <Field
+                className="span-2"
+                label="Nome fantasia"
+                icon={Store}
+                name="nomeFantasia"
+                placeholder="Restaurante Universitário"
+                autoComplete="organization"
+                value={formData.nomeFantasia}
+                onChange={handleChange}
+                required
+                autoFocus
+              />
+              <Field
+                label="CNPJ"
+                icon={Hash}
                 name="cnpj"
                 placeholder="00.000.000/0000-00"
+                inputMode="numeric"
+                maxLength={18}
                 value={formData.cnpj}
                 onChange={handleChange}
                 required
               />
-            </div>
-
-            <div className="form-group">
-              <label>E-mail</label>
-              <input
+              <Field
+                label="E-mail"
+                icon={Mail}
                 type="email"
                 name="email"
                 placeholder="contato@empresa.com"
+                autoComplete="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
-          </div>
+          </section>
 
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Senha</label>
-              <input
-                type="password"
+          <section className="form-section">
+            <h2 className="form-section-title">
+              <KeyRound size={18} /> Acesso
+            </h2>
+            <div className="form-grid">
+              <PasswordField
+                label="Senha"
+                icon={Lock}
                 name="senha"
-                placeholder="********"
+                placeholder="Mínimo de 6 caracteres"
+                autoComplete="new-password"
+                minLength={6}
                 value={formData.senha}
                 onChange={handleChange}
                 required
               />
-            </div>
-
-            <div className="form-group">
-              <label>Confirmar senha</label>
-              <input
-                type="password"
+              <PasswordField
+                label="Confirmar senha"
+                icon={Lock}
                 name="confirmarSenha"
-                placeholder="********"
+                placeholder="Repita a senha"
+                autoComplete="new-password"
                 value={formData.confirmarSenha}
                 onChange={handleChange}
                 required
               />
             </div>
-          </div>
+            <div className="password-feedback">
+              <PasswordStrength senha={formData.senha} />
+              <PasswordMatch senha={formData.senha} confirmacao={formData.confirmarSenha} />
+            </div>
+          </section>
 
-          <div className="btn-group">
-            <Link to="/login" className="btn-secondary">
+          <div className="form-actions">
+            <Link to="/login" className="btn btn-ghost">
               Cancelar
             </Link>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? (
+                <>
+                  <LoaderCircle size={18} className="spin" /> Criando conta...
+                </>
+              ) : (
+                <>
+                  Criar conta <Check size={18} />
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -133,4 +184,3 @@ export default function CadastroEmpresaPage() {
     </div>
   );
 }
-

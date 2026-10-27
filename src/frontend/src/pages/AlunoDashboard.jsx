@@ -1,16 +1,99 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import {
+  Award,
+  CalendarDays,
+  Fingerprint,
+  Gift,
+  GraduationCap,
+  HandCoins,
+  IdCard,
+  Inbox,
+  KeyRound,
+  LayoutDashboard,
+  LoaderCircle,
+  Lock,
+  Mail,
+  MapPin,
+  Receipt,
+  Save,
+  School,
+  Sparkles,
+  Trash2,
+  UserRound,
+  UserRoundPen,
+  Wallet,
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { alunoApi, instituicaoApi } from '../services/api';
-import { NavLink } from 'react-router-dom';
+import LogoMark from '../components/LogoMark';
+import DashboardShell from '../components/DashboardShell';
+import ConfirmDialog from '../components/ConfirmDialog';
+import FormSkeleton from '../components/FormSkeleton';
+import { Field, PasswordField, PasswordStrength, SelectField } from '../components/Field';
+import useCountUp from '../hooks/useCountUp';
+import { formatarMoedas, iniciais, mascaras, membroDesde, primeiroNome } from '../utils/formatters';
+
+const ABAS = [
+  { id: 'extrato', rotulo: 'Visão geral', icone: LayoutDashboard },
+  { id: 'perfil', rotulo: 'Meu perfil', icone: UserRoundPen },
+];
+
+const COMO_FUNCIONA = [
+  { icone: Award, titulo: 'Mostre seu mérito', texto: 'Professores reconhecem sua participação e seu desempenho.' },
+  { icone: HandCoins, titulo: 'Receba moedas', texto: 'As moedas enviadas entram direto no seu saldo.' },
+  { icone: Gift, titulo: 'Troque por vantagens', texto: 'Resgate descontos e benefícios em empresas parceiras.' },
+];
+
+const MASCARAS_CAMPOS = {
+  cpf: mascaras.cpf,
+  end_cep: mascaras.cep,
+};
+
+function CartaoSaldo({ saldo, desde }) {
+  const saldoAnimado = useCountUp(saldo);
+
+  return (
+    <article className="balance-card reveal" style={{ '--i': 1 }}>
+      <div>
+        <span className="balance-label">
+          <Wallet size={16} /> Saldo disponível
+        </span>
+        <div className="balance-value">
+          <strong>{formatarMoedas(saldoAnimado)}</strong>
+          <span>moedas</span>
+        </div>
+      </div>
+      <div className="balance-chips">
+        <span className="chip-glass">
+          <Award size={14} /> Mérito acadêmico
+        </span>
+        {desde && (
+          <span className="chip-glass">
+            <CalendarDays size={14} /> Desde {desde}
+          </span>
+        )}
+      </div>
+      <div className="balance-coin" aria-hidden="true">
+        <LogoMark />
+      </div>
+    </article>
+  );
+}
 
 export default function AlunoDashboard() {
-  const { user, login } = useAuth();
+  const { user, login, logout } = useAuth();
+  const toast = useToast();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('extrato');
   const [aluno, setAluno] = useState(user);
   const [instituicoes, setInstituicoes] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState({ tipo: '', texto: '' });
+  const [carregando, setCarregando] = useState(true);
+  const [confirmandoExclusao, setConfirmandoExclusao] = useState(false);
+  const [excluindo, setExcluindo] = useState(false);
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -32,12 +115,14 @@ export default function AlunoDashboard() {
   });
 
   useEffect(() => {
+    if (!user) return;
+
     async function carregar() {
       try {
         const [instRes, cursosRes, alunoAtualizado] = await Promise.all([
           instituicaoApi.listar(),
           instituicaoApi.listarCursos(),
-          alunoApi.buscarPorId(user?.id || 1),
+          alunoApi.buscarPorId(user.id),
         ]);
         setInstituicoes(instRes);
         setCursos(cursosRes);
@@ -63,13 +148,17 @@ export default function AlunoDashboard() {
         });
       } catch (err) {
         console.error('Erro ao carregar dados do aluno:', err);
+        toast.erro('Não foi possível carregar seus dados.');
+      } finally {
+        setCarregando(false);
       }
     }
     carregar();
-  }, [user]);
+  }, [user, toast]);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value = MASCARAS_CAMPOS[name] ? MASCARAS_CAMPOS[name](e.target.value) : e.target.value;
     if (name.startsWith('end_')) {
       const field = name.replace('end_', '');
       setFormData((prev) => ({
@@ -83,7 +172,6 @@ export default function AlunoDashboard() {
 
   const handleUpdate = async (e) => {
     e.preventDefault();
-    setMsg({ tipo: '', texto: '' });
     setLoading(true);
 
     try {
@@ -100,254 +188,331 @@ export default function AlunoDashboard() {
 
       setAluno(atualizado);
       login(atualizado);
-      setMsg({ tipo: 'sucesso', texto: 'Dados cadastrais atualizados com sucesso!' });
+      toast.sucesso('Dados cadastrais atualizados com sucesso!');
     } catch (err) {
-      setMsg({ tipo: 'erro', texto: err.message || 'Erro ao atualizar dados.' });
+      toast.erro(err.message || 'Erro ao atualizar dados.');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    if (window.confirm('Tem certeza de que deseja excluir permanentemente sua conta de aluno?')) {
-      try {
-        await alunoApi.deletar(aluno.id);
-        alert('Conta excluída com sucesso.');
-        window.location.href = '/login';
-      } catch (err) {
-        alert('Erro ao excluir conta: ' + err.message);
-      }
+    setExcluindo(true);
+    try {
+      await alunoApi.deletar(aluno.id);
+      toast.sucesso('Conta excluída com sucesso.');
+      logout();
+      navigate('/login', { replace: true });
+    } catch (err) {
+      toast.erro('Erro ao excluir conta: ' + err.message);
+      setExcluindo(false);
+      setConfirmandoExclusao(false);
     }
   };
 
+  const desde = membroDesde(aluno?.dataCriacao);
+
   return (
-    <div className="main-layout">
-      <aside className="sidebar">
-        <button
-          type="button"
-          className={`sidebar-link ${activeTab === 'extrato' ? 'active' : ''}`}
-          onClick={() => setActiveTab('extrato')}
-          style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'pointer' }}
-        >
-          Início e extrato
-        </button>
-        <button
-          type="button"
-          className={`sidebar-link ${activeTab === 'perfil' ? 'active' : ''}`}
-          onClick={() => setActiveTab('perfil')}
-          style={{ width: '100%', border: 'none', textAlign: 'left', cursor: 'pointer' }}
-        >
-          Meu perfil (CRUD)
-        </button>
-      </aside>
+    <DashboardShell titulo="Painel do aluno" itens={ABAS} ativo={activeTab} onSelecionar={setActiveTab}>
+      {activeTab === 'extrato' ? (
+        <div key="extrato" className="tab-panel">
+          <div className="page-heading reveal">
+            <h1>
+              Olá, {primeiroNome(aluno?.nome) || 'aluno'}{' '}
+              <span className="wave" aria-hidden="true">
+                👋
+              </span>
+            </h1>
+            <p>Acompanhe seu saldo e suas movimentações de mérito.</p>
+          </div>
 
-      <main className="content-area">
-        {activeTab === 'extrato' ? (
-          <div>
-            <h2>Olá, {aluno?.nome?.split(' ')[0] || 'Aluno'}</h2>
-            <p className="card-subtitle">Acompanhe seu saldo e movimentações de mérito</p>
-
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-label">Saldo atual</div>
-                <div className="stat-value">{aluno?.saldo || 0} moedas</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Curso</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{aluno?.cursoNome || 'Não informado'}</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-label">Instituição</div>
-                <div style={{ fontSize: '1.2rem', fontWeight: 600 }}>{aluno?.instituicaoNome || 'PUC Minas'}</div>
-              </div>
-            </div>
-
-            <div className="card" style={{ marginTop: '24px' }}>
-              <h3>Extrato</h3>
-              <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-                Nenhuma transação registrada até o momento.
-              </p>
+          <div className="overview-grid">
+            <CartaoSaldo saldo={aluno?.saldo} desde={desde} />
+            <div className="overview-side">
+              <article className="stat-card reveal" style={{ '--i': 2 }}>
+                <span className="icon-badge icon-badge-brand">
+                  <GraduationCap size={20} />
+                </span>
+                <div>
+                  <span className="stat-label">Curso</span>
+                  <strong className="stat-value">{aluno?.cursoNome || 'Não informado'}</strong>
+                </div>
+              </article>
+              <article className="stat-card reveal" style={{ '--i': 3 }}>
+                <span className="icon-badge icon-badge-gold">
+                  <School size={20} />
+                </span>
+                <div>
+                  <span className="stat-label">Instituição</span>
+                  <strong className="stat-value">{aluno?.instituicaoNome || 'Não informada'}</strong>
+                </div>
+              </article>
             </div>
           </div>
-        ) : (
-          <div className="card card-form" style={{ maxWidth: '700px' }}>
-            <h2>Meu Perfil - Consultar e Editar</h2>
-            <p className="card-subtitle">Gerencie e atualize seus dados cadastrais (US03)</p>
 
-            {msg.texto && (
-              <div className={msg.tipo === 'sucesso' ? 'alert-success' : 'alert-error'}>
-                {msg.texto}
+          <div className="overview-grid">
+            <article className="card reveal" style={{ '--i': 4 }}>
+              <div className="card-title-row">
+                <h2 className="card-title">
+                  <Receipt size={18} /> Extrato
+                </h2>
+                <span className="muted">Últimas movimentações</span>
               </div>
-            )}
+              <div className="empty-state">
+                <div className="empty-illustration">
+                  <Inbox size={34} />
+                  <span className="empty-coin" aria-hidden="true">
+                    <LogoMark />
+                  </span>
+                </div>
+                <h3>Nenhuma movimentação ainda</h3>
+                <p>Quando você receber moedas ou resgatar uma vantagem, tudo aparecerá aqui.</p>
+              </div>
+            </article>
 
-            <form onSubmit={handleUpdate}>
-              <div className="form-section-title">Dados pessoais</div>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Nome completo</label>
-                  <input
-                    type="text"
+            <article className="card reveal" style={{ '--i': 5 }}>
+              <h2 className="card-title">
+                <Sparkles size={18} /> Como funciona
+              </h2>
+              <ol className="how-steps">
+                {COMO_FUNCIONA.map(({ icone: Icone, titulo, texto }) => (
+                  <li key={titulo}>
+                    <span className="how-icon">
+                      <Icone size={20} />
+                    </span>
+                    <strong>{titulo}</strong>
+                    <p>{texto}</p>
+                  </li>
+                ))}
+              </ol>
+            </article>
+          </div>
+        </div>
+      ) : (
+        <div key="perfil" className="tab-panel">
+          <div className="profile-hero reveal">
+            <span className="avatar avatar-lg">{iniciais(aluno?.nome)}</span>
+            <div className="profile-hero-text">
+              <span className="eyebrow-text">Meu perfil</span>
+              <h1>{aluno?.nome}</h1>
+              <div className="meta-row">
+                <span className="meta-chip">
+                  <Mail size={14} /> {aluno?.email}
+                </span>
+                {desde && (
+                  <span className="meta-chip">
+                    <CalendarDays size={14} /> Membro desde {desde}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {carregando ? (
+            <FormSkeleton campos={6} />
+          ) : (
+            <form onSubmit={handleUpdate} className="card form-card reveal" style={{ '--i': 1 }}>
+              <section className="form-section">
+                <h2 className="form-section-title">
+                  <UserRound size={18} /> Dados pessoais
+                </h2>
+                <div className="form-grid">
+                  <Field
+                    label="Nome completo"
+                    icon={UserRound}
                     name="nome"
+                    autoComplete="name"
                     value={formData.nome}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>E-mail</label>
-                  <input
+                  <Field
+                    label="E-mail"
+                    icon={Mail}
                     type="email"
                     name="email"
+                    autoComplete="email"
                     value={formData.email}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>CPF</label>
-                  <input
-                    type="text"
+                  <Field
+                    label="CPF"
+                    icon={IdCard}
                     name="cpf"
+                    inputMode="numeric"
+                    maxLength={14}
                     value={formData.cpf}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>RG</label>
-                  <input
-                    type="text"
+                  <Field
+                    label="RG"
+                    icon={Fingerprint}
                     name="rg"
                     value={formData.rg}
                     onChange={handleChange}
                     required
                   />
                 </div>
-              </div>
+              </section>
 
-              <div className="form-section-title">Endereço</div>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Logradouro</label>
-                  <input
-                    type="text"
+              <section className="form-section">
+                <h2 className="form-section-title">
+                  <MapPin size={18} /> Endereço
+                </h2>
+                <div className="form-grid cols-6">
+                  <Field
+                    className="span-4"
+                    label="Logradouro"
                     name="end_logradouro"
+                    autoComplete="address-line1"
                     value={formData.endereco.logradouro}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>Número</label>
-                  <input
-                    type="text"
+                  <Field
+                    className="span-2"
+                    label="Número"
                     name="end_numero"
                     value={formData.endereco.numero}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>Bairro</label>
-                  <input
-                    type="text"
+                  <Field
+                    className="span-3"
+                    label="Complemento"
+                    name="end_complemento"
+                    placeholder="Opcional"
+                    autoComplete="address-line2"
+                    value={formData.endereco.complemento || ''}
+                    onChange={handleChange}
+                  />
+                  <Field
+                    className="span-3"
+                    label="Bairro"
                     name="end_bairro"
                     value={formData.endereco.bairro}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>Cidade</label>
-                  <input
-                    type="text"
+                  <Field
+                    className="span-3"
+                    label="Cidade"
                     name="end_cidade"
+                    autoComplete="address-level2"
                     value={formData.endereco.cidade}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>Estado</label>
-                  <input
-                    type="text"
+                  <Field
+                    className="span-1"
+                    label="Estado"
                     name="end_estado"
+                    autoComplete="address-level1"
                     value={formData.endereco.estado}
                     onChange={handleChange}
                     required
                   />
-                </div>
-                <div className="form-group">
-                  <label>CEP</label>
-                  <input
-                    type="text"
+                  <Field
+                    className="span-2"
+                    label="CEP"
                     name="end_cep"
+                    inputMode="numeric"
+                    maxLength={9}
+                    autoComplete="postal-code"
                     value={formData.endereco.cep}
                     onChange={handleChange}
                     required
                   />
                 </div>
-              </div>
+              </section>
 
-              <div className="form-section-title">Vínculo acadêmico</div>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Instituição</label>
-                  <select
+              <section className="form-section">
+                <h2 className="form-section-title">
+                  <School size={18} /> Vínculo acadêmico
+                </h2>
+                <div className="form-grid">
+                  <SelectField
+                    label="Instituição"
+                    icon={School}
                     name="instituicaoId"
+                    options={instituicoes}
                     value={formData.instituicaoId}
                     onChange={handleChange}
                     required
-                  >
-                    {instituicoes.map((inst) => (
-                      <option key={inst.id} value={inst.id}>
-                        {inst.nome}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="form-group">
-                  <label>Curso</label>
-                  <select
+                  />
+                  <SelectField
+                    label="Curso"
+                    icon={GraduationCap}
                     name="cursoId"
+                    options={cursos}
                     value={formData.cursoId}
                     onChange={handleChange}
                     required
-                  >
-                    {cursos.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.nome}
-                      </option>
-                    ))}
-                  </select>
+                  />
                 </div>
-              </div>
+              </section>
 
-              <div className="form-section-title">Alterar Senha (opcional)</div>
-              <div className="form-group">
-                <label>Nova Senha</label>
-                <input
-                  type="password"
-                  name="senha"
-                  placeholder="Deixe em branco para não alterar"
-                  value={formData.senha}
-                  onChange={handleChange}
-                />
-              </div>
+              <section className="form-section">
+                <h2 className="form-section-title">
+                  <KeyRound size={18} /> Segurança
+                </h2>
+                <div className="form-grid">
+                  <PasswordField
+                    label="Nova senha (opcional)"
+                    icon={Lock}
+                    name="senha"
+                    placeholder="Deixe em branco para manter"
+                    autoComplete="new-password"
+                    minLength={6}
+                    value={formData.senha}
+                    onChange={handleChange}
+                  />
+                </div>
+                <div className="password-feedback">
+                  <PasswordStrength senha={formData.senha} />
+                </div>
+              </section>
 
-              <div className="btn-group" style={{ justifyContent: 'space-between', marginTop: '30px' }}>
-                <button type="button" className="btn-danger" onClick={handleDelete}>
-                  Excluir meu cadastro
-                </button>
-                <button type="submit" className="btn-primary" disabled={loading}>
-                  {loading ? 'Salvando...' : 'Salvar alterações'}
+              <div className="form-actions">
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                  {loading ? (
+                    <>
+                      <LoaderCircle size={18} className="spin" /> Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save size={18} /> Salvar alterações
+                    </>
+                  )}
                 </button>
               </div>
             </form>
-          </div>
-        )}
-      </main>
-    </div>
+          )}
+
+          <section className="danger-zone reveal" style={{ '--i': 2 }}>
+            <div>
+              <h2>Excluir conta</h2>
+              <p>Esta ação é permanente e não pode ser desfeita.</p>
+            </div>
+            <button type="button" className="btn btn-danger-soft" onClick={() => setConfirmandoExclusao(true)}>
+              <Trash2 size={18} /> Excluir minha conta
+            </button>
+          </section>
+        </div>
+      )}
+
+      <ConfirmDialog
+        aberto={confirmandoExclusao}
+        titulo="Excluir sua conta?"
+        descricao="Todos os seus dados serão removidos permanentemente, incluindo seu saldo de moedas. Essa ação não pode ser desfeita."
+        textoConfirmar="Sim, excluir conta"
+        textoCarregando="Excluindo..."
+        carregando={excluindo}
+        onConfirmar={handleDelete}
+        onCancelar={() => setConfirmandoExclusao(false)}
+      />
+    </DashboardShell>
   );
 }
-

@@ -1,13 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  ArrowLeft,
+  ArrowRight,
+  Check,
+  CircleAlert,
+  Fingerprint,
+  GraduationCap,
+  IdCard,
+  KeyRound,
+  LoaderCircle,
+  Lock,
+  Mail,
+  MapPin,
+  School,
+  UserRound,
+} from 'lucide-react';
 import { alunoApi, instituicaoApi } from '../services/api';
+import { useToast } from '../context/ToastContext';
+import { Field, PasswordField, PasswordMatch, PasswordStrength, SelectField } from '../components/Field';
+import { mascaras } from '../utils/formatters';
+
+const ETAPAS = [
+  { titulo: 'Dados pessoais', descricao: 'Conte um pouco sobre você.', icone: UserRound },
+  { titulo: 'Endereço', descricao: 'Onde você mora atualmente.', icone: MapPin },
+  { titulo: 'Vínculo acadêmico', descricao: 'Sua instituição de ensino e seu curso.', icone: School },
+  { titulo: 'Acesso', descricao: 'Crie uma senha para entrar no sistema.', icone: KeyRound },
+];
+
+const MASCARAS_CAMPOS = {
+  cpf: mascaras.cpf,
+  end_cep: mascaras.cep,
+};
 
 export default function CadastroAlunoPage() {
   const navigate = useNavigate();
+  const toast = useToast();
   const [instituicoes, setInstituicoes] = useState([]);
   const [cursos, setCursos] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [etapa, setEtapa] = useState(0);
+  const [direcao, setDirecao] = useState('avancar');
 
   const [formData, setFormData] = useState({
     nome: '',
@@ -52,7 +86,8 @@ export default function CadastroAlunoPage() {
   }, []);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
+    const { name } = e.target;
+    const value = MASCARAS_CAMPOS[name] ? MASCARAS_CAMPOS[name](e.target.value) : e.target.value;
     if (name.startsWith('end_')) {
       const field = name.replace('end_', '');
       setFormData((prev) => ({
@@ -64,9 +99,24 @@ export default function CadastroAlunoPage() {
     }
   };
 
+  const ultimaEtapa = etapa === ETAPAS.length - 1;
+  const etapaAtual = ETAPAS[etapa];
+
+  const irParaEtapa = (destino) => {
+    setDirecao(destino > etapa ? 'avancar' : 'voltar');
+    setEtapa(destino);
+    setError('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    // Só os campos da etapa atual estão na tela, então o navegador valida etapa por etapa
+    if (!ultimaEtapa) {
+      irParaEtapa(etapa + 1);
+      return;
+    }
 
     if (formData.senha !== formData.confirmarSenha) {
       setError('As senhas digitadas não coincidem.');
@@ -87,7 +137,7 @@ export default function CadastroAlunoPage() {
       };
 
       await alunoApi.cadastrar(payload);
-      alert('Aluno cadastrado com sucesso!');
+      toast.sucesso('Conta criada com sucesso! Agora é só entrar.');
       navigate('/login');
     } catch (err) {
       setError(err.message || 'Erro ao cadastrar aluno.');
@@ -97,206 +147,266 @@ export default function CadastroAlunoPage() {
   };
 
   return (
-    <div className="center-container">
-      <div className="card card-form">
-        <h2>Cadastro de aluno</h2>
-        <p className="card-subtitle">Preencha seus dados para começar a receber e trocar moedas</p>
+    <div className="page page-form">
+      <Link to="/login" className="back-link">
+        <ArrowLeft size={16} /> Voltar para o login
+      </Link>
 
-        {error && <div className="alert-error">{error}</div>}
+      <div className="card form-card reveal">
+        <header className="form-card-header">
+          <span className="icon-badge icon-badge-brand icon-badge-lg">
+            <GraduationCap size={26} />
+          </span>
+          <div>
+            <h1>Crie sua conta de aluno</h1>
+            <p>Em poucos passos você estará pronto para receber moedas e trocá-las por vantagens.</p>
+          </div>
+        </header>
+
+        <ol className="stepper" aria-label="Etapas do cadastro">
+          {ETAPAS.map((item, indice) => {
+            const Icone = item.icone;
+            const concluida = indice < etapa;
+            const atual = indice === etapa;
+            return (
+              <li key={item.titulo} className={`step${concluida ? ' is-done' : ''}${atual ? ' is-current' : ''}`}>
+                <button
+                  type="button"
+                  className="step-dot"
+                  onClick={() => irParaEtapa(indice)}
+                  disabled={!concluida}
+                  aria-current={atual ? 'step' : undefined}
+                  aria-label={`Etapa ${indice + 1}: ${item.titulo}`}
+                >
+                  {concluida ? <Check size={18} strokeWidth={3} /> : <Icone size={18} />}
+                </button>
+                <span className="step-label">{item.titulo}</span>
+              </li>
+            );
+          })}
+        </ol>
+
+        {error && (
+          <div key={error} className="alert alert-error" role="alert">
+            <CircleAlert size={18} />
+            <span>{error}</span>
+          </div>
+        )}
 
         <form onSubmit={handleSubmit}>
-          <div className="form-section-title">Dados pessoais</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Nome completo</label>
-              <input
-                type="text"
-                name="nome"
-                placeholder="Maria Silva"
-                value={formData.nome}
-                onChange={handleChange}
-                required
-              />
+          <div key={etapa} className={`step-panel${direcao === 'voltar' ? ' from-left' : ''}`}>
+            <div className="step-heading">
+              <h2>{etapaAtual.titulo}</h2>
+              <p>{etapaAtual.descricao}</p>
             </div>
-            <div className="form-group">
-              <label>E-mail</label>
-              <input
-                type="email"
-                name="email"
-                placeholder="maria@email.com"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>CPF</label>
-              <input
-                type="text"
-                name="cpf"
-                placeholder="000.000.000-00"
-                value={formData.cpf}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>RG</label>
-              <input
-                type="text"
-                name="rg"
-                placeholder="MG-00.000.000"
-                value={formData.rg}
-                onChange={handleChange}
-                required
-              />
-            </div>
+
+            {etapa === 0 && (
+              <div className="form-grid">
+                <Field
+                  className="span-2"
+                  label="Nome completo"
+                  icon={UserRound}
+                  name="nome"
+                  placeholder="Maria Silva"
+                  autoComplete="name"
+                  value={formData.nome}
+                  onChange={handleChange}
+                  required
+                  autoFocus
+                />
+                <Field
+                  className="span-2"
+                  label="E-mail"
+                  icon={Mail}
+                  type="email"
+                  name="email"
+                  placeholder="maria@email.com"
+                  autoComplete="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+                <Field
+                  label="CPF"
+                  icon={IdCard}
+                  name="cpf"
+                  placeholder="000.000.000-00"
+                  inputMode="numeric"
+                  maxLength={14}
+                  value={formData.cpf}
+                  onChange={handleChange}
+                  required
+                />
+                <Field
+                  label="RG"
+                  icon={Fingerprint}
+                  name="rg"
+                  placeholder="MG-00.000.000"
+                  value={formData.rg}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            )}
+
+            {etapa === 1 && (
+              <div className="form-grid cols-6">
+                <Field
+                  className="span-4"
+                  label="Logradouro"
+                  name="end_logradouro"
+                  placeholder="Rua / Avenida"
+                  autoComplete="address-line1"
+                  value={formData.endereco.logradouro}
+                  onChange={handleChange}
+                  required
+                  autoFocus
+                />
+                <Field
+                  className="span-2"
+                  label="Número"
+                  name="end_numero"
+                  placeholder="123"
+                  value={formData.endereco.numero}
+                  onChange={handleChange}
+                  required
+                />
+                <Field
+                  className="span-3"
+                  label="Complemento"
+                  name="end_complemento"
+                  placeholder="Apto, bloco (opcional)"
+                  autoComplete="address-line2"
+                  value={formData.endereco.complemento}
+                  onChange={handleChange}
+                />
+                <Field
+                  className="span-3"
+                  label="Bairro"
+                  name="end_bairro"
+                  placeholder="Bairro"
+                  value={formData.endereco.bairro}
+                  onChange={handleChange}
+                  required
+                />
+                <Field
+                  className="span-3"
+                  label="Cidade"
+                  name="end_cidade"
+                  autoComplete="address-level2"
+                  value={formData.endereco.cidade}
+                  onChange={handleChange}
+                  required
+                />
+                <Field
+                  className="span-1"
+                  label="Estado"
+                  name="end_estado"
+                  autoComplete="address-level1"
+                  value={formData.endereco.estado}
+                  onChange={handleChange}
+                  required
+                />
+                <Field
+                  className="span-2"
+                  label="CEP"
+                  name="end_cep"
+                  placeholder="00000-000"
+                  inputMode="numeric"
+                  maxLength={9}
+                  autoComplete="postal-code"
+                  value={formData.endereco.cep}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            )}
+
+            {etapa === 2 && (
+              <div className="form-grid">
+                <SelectField
+                  label="Instituição de ensino"
+                  icon={School}
+                  name="instituicaoId"
+                  options={instituicoes}
+                  value={formData.instituicaoId}
+                  onChange={handleChange}
+                  required
+                  autoFocus
+                />
+                <SelectField
+                  label="Curso"
+                  icon={GraduationCap}
+                  name="cursoId"
+                  options={cursos}
+                  value={formData.cursoId}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            )}
+
+            {etapa === 3 && (
+              <>
+                <div className="form-grid">
+                  <PasswordField
+                    label="Senha"
+                    icon={Lock}
+                    name="senha"
+                    placeholder="Mínimo de 6 caracteres"
+                    autoComplete="new-password"
+                    minLength={6}
+                    value={formData.senha}
+                    onChange={handleChange}
+                    required
+                    autoFocus
+                  />
+                  <PasswordField
+                    label="Confirmar senha"
+                    icon={Lock}
+                    name="confirmarSenha"
+                    placeholder="Repita a senha"
+                    autoComplete="new-password"
+                    value={formData.confirmarSenha}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+                <div className="password-feedback">
+                  <PasswordStrength senha={formData.senha} />
+                  <PasswordMatch senha={formData.senha} confirmacao={formData.confirmarSenha} />
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="form-section-title">Endereço</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Logradouro</label>
-              <input
-                type="text"
-                name="end_logradouro"
-                placeholder="Rua / Avenida"
-                value={formData.endereco.logradouro}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Número</label>
-              <input
-                type="text"
-                name="end_numero"
-                placeholder="123"
-                value={formData.endereco.numero}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Complemento</label>
-              <input
-                type="text"
-                name="end_complemento"
-                placeholder="Apto, bloco (opcional)"
-                value={formData.endereco.complemento}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label>Bairro</label>
-              <input
-                type="text"
-                name="end_bairro"
-                placeholder="Bairro"
-                value={formData.endereco.bairro}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Cidade</label>
-              <input
-                type="text"
-                name="end_cidade"
-                value={formData.endereco.cidade}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Estado</label>
-              <input
-                type="text"
-                name="end_estado"
-                value={formData.endereco.estado}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group full-width">
-              <label>CEP</label>
-              <input
-                type="text"
-                name="end_cep"
-                placeholder="00000-000"
-                value={formData.endereco.cep}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-section-title">Vínculo acadêmico</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Instituição de ensino</label>
-              <select
-                name="instituicaoId"
-                value={formData.instituicaoId}
-                onChange={handleChange}
-                required
-              >
-                {instituicoes.map((inst) => (
-                  <option key={inst.id} value={inst.id}>
-                    {inst.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group">
-              <label>Curso</label>
-              <select
-                name="cursoId"
-                value={formData.cursoId}
-                onChange={handleChange}
-                required
-              >
-                {cursos.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.nome}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          <div className="form-section-title">Acesso</div>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Senha</label>
-              <input
-                type="password"
-                name="senha"
-                placeholder="********"
-                value={formData.senha}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div className="form-group">
-              <label>Confirmar senha</label>
-              <input
-                type="password"
-                name="confirmarSenha"
-                placeholder="********"
-                value={formData.confirmarSenha}
-                onChange={handleChange}
-                required
-              />
-            </div>
-          </div>
-
-          <div className="btn-group">
-            <Link to="/login" className="btn-secondary">
-              Cancelar
-            </Link>
-            <button type="submit" className="btn-primary" disabled={loading}>
-              {loading ? 'Cadastrando...' : 'Cadastrar'}
+          <div className="form-actions">
+            {etapa === 0 ? (
+              <Link to="/login" className="btn btn-ghost">
+                Cancelar
+              </Link>
+            ) : (
+              <button type="button" className="btn btn-ghost" onClick={() => irParaEtapa(etapa - 1)}>
+                <ArrowLeft size={18} /> Voltar
+              </button>
+            )}
+            <span className="step-counter">
+              Etapa {etapa + 1} de {ETAPAS.length}
+            </span>
+            <button type="submit" className="btn btn-primary" disabled={loading}>
+              {loading ? (
+                <>
+                  <LoaderCircle size={18} className="spin" /> Criando conta...
+                </>
+              ) : ultimaEtapa ? (
+                <>
+                  Criar conta <Check size={18} />
+                </>
+              ) : (
+                <>
+                  Continuar <ArrowRight size={18} className="btn-arrow" />
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -304,4 +414,3 @@ export default function CadastroAlunoPage() {
     </div>
   );
 }
-
