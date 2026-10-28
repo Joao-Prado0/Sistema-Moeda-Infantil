@@ -6,11 +6,14 @@ import LoginPage from './pages/LoginPage';
 import CadastroAlunoPage from './pages/CadastroAlunoPage';
 import CadastroEmpresaPage from './pages/CadastroEmpresaPage';
 import AlunoDashboard from './pages/AlunoDashboard';
+import ProfessorDashboard from './pages/ProfessorDashboard';
 import EmpresaDashboard from './pages/EmpresaDashboard';
 
 function rotaInicial(user) {
   if (!user) return '/login';
-  return user.perfil === 'EMPRESA' ? '/empresa/dashboard' : '/aluno/dashboard';
+  if (user.perfil === 'PROFESSOR') return '/professor/dashboard';
+  if (user.perfil === 'EMPRESA') return '/empresa/dashboard';
+  return '/aluno/dashboard';
 }
 
 function RotaInicial() {
@@ -30,7 +33,6 @@ function RotaProtegida({ perfil, children }) {
   return children;
 }
 
-// A key força a remontagem a cada rota, disparando a animação de entrada
 function AnimatedRoutes() {
   const location = useLocation();
 
@@ -53,6 +55,14 @@ function AnimatedRoutes() {
           element={
             <RotaProtegida perfil="ALUNO">
               <AlunoDashboard />
+            </RotaProtegida>
+          }
+        />
+        <Route
+          path="/professor/dashboard"
+          element={
+            <RotaProtegida perfil="PROFESSOR">
+              <ProfessorDashboard />
             </RotaProtegida>
           }
         />

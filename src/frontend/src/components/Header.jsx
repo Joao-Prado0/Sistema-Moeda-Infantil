@@ -15,7 +15,19 @@ export default function Header() {
   };
 
   const nome = user?.nome || user?.nomeFantasia || '';
-  const ehEmpresa = user?.perfil === 'EMPRESA';
+  const perfil = user?.perfil;
+
+  const getRoleLabel = () => {
+    if (perfil === 'PROFESSOR') return 'Professor';
+    if (perfil === 'EMPRESA') return 'Empresa';
+    return 'Aluno';
+  };
+
+  const getRoleClass = () => {
+    if (perfil === 'PROFESSOR') return 'role-professor';
+    if (perfil === 'EMPRESA') return 'role-empresa';
+    return 'role-aluno';
+  };
 
   return (
     <header className="app-header">
@@ -30,11 +42,13 @@ export default function Header() {
         {user ? (
           <div className="header-actions">
             <div className="user-chip">
-              <span className={`avatar avatar-sm${ehEmpresa ? ' avatar-gold' : ''}`}>{iniciais(nome)}</span>
+              <span className={`avatar avatar-sm${perfil === 'EMPRESA' ? ' avatar-gold' : ''}`}>
+                {iniciais(nome)}
+              </span>
               <span className="user-chip-text">
                 <span className="user-chip-name">{nome}</span>
-                <span className={`role-badge ${ehEmpresa ? 'role-empresa' : 'role-aluno'}`}>
-                  {ehEmpresa ? 'Empresa' : 'Aluno'}
+                <span className={`role-badge ${getRoleClass()}`}>
+                  {getRoleLabel()}
                 </span>
               </span>
             </div>

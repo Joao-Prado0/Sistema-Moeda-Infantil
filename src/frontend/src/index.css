@@ -216,6 +216,11 @@ svg {
   background: var(--gold-100);
 }
 
+.role-professor {
+  color: #047857;
+  background: #ecfdf5;
+}
+
 /* ---------- Estrutura de páginas ---------- */
 
 .page-transition {
@@ -2149,4 +2154,109 @@ svg {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+
+/* ---------- Tabelas de Dados e Extrato (Aluno, Professor, Empresa) ---------- */
+.data-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.data-table th {
+  padding: 14px 18px;
+  background: var(--surface-muted);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background: var(--brand-50);
+}
+
+.table-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.badge-envio {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.badge-credito {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.badge-recebimento {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.badge-troca {
+  color: var(--brand-700);
+  background: var(--brand-100);
+}
+
+.badge-gerado {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.badge-utilizado {
+  color: #047857;
+  background: #d1fae5;
+}
+
+.badge-pendente {
+  color: #b45309;
+  background: #fef3c7;
+}
+
+.moedas-pos {
+  font-weight: 700;
+  color: #047857;
+}
+
+.moedas-neg {
+  font-weight: 700;
+  color: #dc2626;
+}
+
+.metrics-3col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
 }

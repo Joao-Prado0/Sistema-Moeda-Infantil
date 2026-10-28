@@ -15,7 +15,7 @@ import {
   Store,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { alunoApi, empresaApi } from '../services/api';
+import { authApi } from '../services/api';
 import LogoMark from '../components/LogoMark';
 import { Field, PasswordField } from '../components/Field';
 
@@ -48,27 +48,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      // Procura primeiro em alunos
-      const alunos = await alunoApi.listar();
-      const aluno = alunos.find((a) => a.email.toLowerCase() === email.toLowerCase());
+      const userData = await authApi.login({ email, senha });
+      login(userData);
 
-      if (aluno) {
-        login(aluno);
-        navigate('/aluno/dashboard');
-        return;
-      }
-
-      // Procura em empresas
-      const empresas = await empresaApi.listar();
-      const empresa = empresas.find((emp) => emp.email.toLowerCase() === email.toLowerCase());
-
-      if (empresa) {
-        login(empresa);
+      if (userData.perfil === 'PROFESSOR') {
+        navigate('/professor/dashboard');
+      } else if (userData.perfil === 'EMPRESA') {
         navigate('/empresa/dashboard');
-        return;
+      } else {
+        navigate('/aluno/dashboard');
       }
-
-      setError('Credenciais inválidas. Verifique o e-mail informado.');
     } catch (err) {
       setError(err.message || 'Erro ao realizar login.');
     } finally {
@@ -100,24 +89,26 @@ export default function LoginPage() {
           <LogoMark />
         </div>
 
-        <div className="auth-hero-content">
-          <span className="eyebrow reveal">
-            <Sparkles size={14} /> Programa de mérito acadêmico
+        <div className="auth-hero-content reveal">
+          <span className="badge-pill">
+            <Sparkles size={14} /> Mérito que vale vantagens
           </span>
-          <h1 className="reveal" style={{ '--i': 1 }}>
-            Seu esforço <em>vale moedas</em>.
+          <h1>
+            Reconhecimento <br />
+            <span>acadêmico real.</span>
           </h1>
-          <p className="reveal" style={{ '--i': 2 }}>
-            Professores reconhecem seu desempenho com moedas que você troca por descontos e vantagens em
-            empresas parceiras.
+          <p>
+            Professores distribuem moedas por participação e destaque. Alunos trocam por experiências e
+            produtos em parceiros.
           </p>
-          <ul className="hero-benefits">
-            {BENEFICIOS.map(({ icone: Icone, texto }, i) => (
-              <li key={texto} className="reveal" style={{ '--i': i + 3 }}>
-                <span className="hero-benefit-icon">
+
+          <ul className="benefit-list">
+            {BENEFICIOS.map(({ icone: Icone, texto }) => (
+              <li key={texto}>
+                <span className="benefit-icon">
                   <Icone size={18} />
                 </span>
-                {texto}
+                <span>{texto}</span>
               </li>
             ))}
           </ul>
@@ -126,26 +117,25 @@ export default function LoginPage() {
 
       <section className="auth-panel">
         <div className="auth-card">
-          <h2 className="reveal" style={{ '--i': 1 }}>
-            Acesse sua conta
-          </h2>
-          <p className="auth-subtitle reveal" style={{ '--i': 2 }}>
-            Entre com seu e-mail e senha para continuar.
-          </p>
+          <header className="auth-card-header reveal" style={{ '--i': 1 }}>
+            <span className="eyebrow-text">Bem-vindo de volta</span>
+            <h2>Entrar na sua conta</h2>
+            <p>Acesse seu painel com seu e-mail e sua senha cadastrados.</p>
+          </header>
 
           {error && (
-            <div key={error} className="alert alert-error" role="alert">
+            <div className="alert alert-danger" role="alert">
               <CircleAlert size={18} />
               <span>{error}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="form-stack reveal" style={{ '--i': 3 }}>
+          <form onSubmit={handleSubmit} className="auth-form reveal" style={{ '--i': 3 }}>
             <Field
               label="E-mail"
               icon={Mail}
               type="email"
-              placeholder="voce@email.com"
+              placeholder="seu.email@exemplo.com"
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
