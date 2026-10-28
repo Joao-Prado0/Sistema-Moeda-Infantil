@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/professores")
 @CrossOrigin(origins = "*")
@@ -27,8 +29,6 @@ public class ProfessorController {
 
     /**
      * Dashboard do professor autenticado.
-     * <p>
-     * TODO: Quando JWT/session estiver disponível, extrair o id do SecurityContext.
      */
     @GetMapping("/me/dashboard")
     public ResponseEntity<ProfessorDashboardDTO> obterDashboard(
@@ -38,8 +38,6 @@ public class ProfessorController {
 
     /**
      * Envia moedas para um aluno.
-     * <p>
-     * TODO: Quando JWT/session estiver disponível, extrair o id do SecurityContext.
      */
     @PostMapping("/me/envios")
     public ResponseEntity<EnvioMoedasResponseDTO> enviarMoedas(
@@ -47,5 +45,16 @@ public class ProfessorController {
             @Valid @RequestBody EnvioMoedasRequestDTO dto) {
         return ResponseEntity.ok(professorService.enviarMoedas(professorId, dto));
     }
-}
 
+    /**
+     * Dispara o crédito semestral acumulável (1.000 moedas) para todos os professores cadastrados.
+     */
+    @PostMapping("/credito-semestral")
+    public ResponseEntity<Map<String, Object>> aplicarCreditoSemestral() {
+        var professores = professorService.aplicarCreditoSemestralEmLote();
+        return ResponseEntity.ok(Map.of(
+                "mensagem", "Crédito semestral de 1.000 moedas aplicado com sucesso a todos os professores.",
+                "totalProfessoresCreditados", professores.size()
+        ));
+    }
+}

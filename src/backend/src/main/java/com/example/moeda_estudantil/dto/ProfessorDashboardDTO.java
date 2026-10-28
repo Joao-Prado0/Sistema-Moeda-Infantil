@@ -16,10 +16,12 @@ import java.util.List;
 public class ProfessorDashboardDTO {
 
     private String nome;
+    private String cpf;
+    private String departamentoNome;
+    private String instituicaoNome;
     private Double saldoDisponivel;
     /** Crédito semestral fixo: 1000 moedas. */
     private Double creditoSemestral;
     private Double totalEnviado;
     private List<ExtratoProfessorItemDTO> extrato;
 }
-

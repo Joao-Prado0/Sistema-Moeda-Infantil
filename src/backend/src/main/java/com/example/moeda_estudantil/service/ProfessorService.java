@@ -1,4 +1,3 @@
-
 package com.example.moeda_estudantil.service;
 
 import com.example.moeda_estudantil.dto.EnvioMoedasRequestDTO;
@@ -63,6 +62,9 @@ public class ProfessorService {
 
         return ProfessorDashboardDTO.builder()
                 .nome(professor.getNome())
+                .cpf(professor.getCpf())
+                .departamentoNome(professor.getDepartamento() != null ? professor.getDepartamento().getNome() : null)
+                .instituicaoNome(professor.getInstituicao() != null ? professor.getInstituicao().getNome() : null)
                 .saldoDisponivel(professor.getSaldo())
                 .creditoSemestral(CREDITO_SEMESTRAL)
                 .totalEnviado(totalEnviado)
@@ -153,9 +155,6 @@ public class ProfessorService {
     /**
      * Adiciona {@value #CREDITO_SEMESTRAL} moedas ao saldo do professor
      * e registra uma {@link TipoTransacao#CREDITO_SEMESTRAL} no histórico.
-     * <p>
-     * Chamado pelo DataLoader para dados de teste.
-     * TODO: Quando houver scheduler, chamar este método via @Scheduled no início de cada semestre.
      */
     @Transactional
     public void aplicarCreditoSemestral(Long professorId) {
@@ -171,6 +170,18 @@ public class ProfessorService {
                 .motivo("Crédito semestral")
                 .professor(professor)
                 .build());
+    }
+
+    /**
+     * Aplica o crédito semestral acumulável para todos os professores cadastrados.
+     */
+    @Transactional
+    public List<Professor> aplicarCreditoSemestralEmLote() {
+        List<Professor> professores = professorRepository.findAll();
+        for (Professor prof : professores) {
+            aplicarCreditoSemestral(prof.getId());
+        }
+        return professores;
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
@@ -195,4 +206,3 @@ public class ProfessorService {
                 .build();
     }
 }
-
