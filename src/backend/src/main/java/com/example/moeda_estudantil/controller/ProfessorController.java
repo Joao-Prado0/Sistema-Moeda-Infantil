@@ -2,12 +2,17 @@ package com.example.moeda_estudantil.controller;
 
 import com.example.moeda_estudantil.dto.EnvioMoedasRequestDTO;
 import com.example.moeda_estudantil.dto.EnvioMoedasResponseDTO;
+import com.example.moeda_estudantil.dto.ProfessorCadastroDTO;
+import com.example.moeda_estudantil.dto.ProfessorCriadoDTO;
 import com.example.moeda_estudantil.dto.ProfessorDashboardDTO;
 import com.example.moeda_estudantil.service.ProfessorService;
 import jakarta.validation.Valid;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -57,4 +62,15 @@ public class ProfessorController {
                 "totalProfessoresCreditados", professores.size()
         ));
     }
+
+    @PostMapping
+public ResponseEntity<ProfessorCriadoDTO> cadastrar(@Valid @RequestBody ProfessorCadastroDTO dto) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(professorService.cadastrar(dto));
+}
+
+@PostMapping("/{id}/credito-semestral")
+public ResponseEntity<Void> creditoSemestral(@PathVariable Long id) {
+    professorService.aplicarCreditoSemestral(id);
+    return ResponseEntity.ok().build();
+}
 }

@@ -3,18 +3,28 @@ package com.example.moeda_estudantil.service;
 import com.example.moeda_estudantil.dto.EnvioMoedasRequestDTO;
 import com.example.moeda_estudantil.dto.EnvioMoedasResponseDTO;
 import com.example.moeda_estudantil.dto.ExtratoProfessorItemDTO;
+import com.example.moeda_estudantil.dto.ProfessorCadastroDTO;
+import com.example.moeda_estudantil.dto.ProfessorCriadoDTO;
 import com.example.moeda_estudantil.dto.ProfessorDashboardDTO;
 import com.example.moeda_estudantil.exception.RecursoNaoEncontradoException;
 import com.example.moeda_estudantil.exception.RegraNegocioException;
 import com.example.moeda_estudantil.model.Aluno;
+import com.example.moeda_estudantil.model.Departamento;
+import com.example.moeda_estudantil.model.Instituicao;
 import com.example.moeda_estudantil.model.Professor;
 import com.example.moeda_estudantil.model.Transacao;
+import com.example.moeda_estudantil.model.enums.PerfilUsuario;
 import com.example.moeda_estudantil.model.enums.TipoTransacao;
 import com.example.moeda_estudantil.repository.AlunoRepository;
 import com.example.moeda_estudantil.repository.ProfessorRepository;
 import com.example.moeda_estudantil.repository.TransacaoRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.moeda_estudantil.dto.ProfessorCadastroDTO;
+import com.example.moeda_estudantil.dto.ProfessorCriadoDTO;
+import com.example.moeda_estudantil.repository.DepartamentoRepository;
+import com.example.moeda_estudantil.repository.InstituicaoRepository;
+import com.example.moeda_estudantil.repository.UsuarioRepository;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -28,19 +38,28 @@ public class ProfessorService {
     public static final double CREDITO_SEMESTRAL = 1000.0;
 
     private final ProfessorRepository professorRepository;
-    private final AlunoRepository alunoRepository;
-    private final TransacaoRepository transacaoRepository;
-    private final EmailService emailService;
+private final AlunoRepository alunoRepository;
+private final TransacaoRepository transacaoRepository;
+private final EmailService emailService;
+private final UsuarioRepository usuarioRepository;
+private final InstituicaoRepository instituicaoRepository;
+private final DepartamentoRepository departamentoRepository;
 
     public ProfessorService(ProfessorRepository professorRepository,
-                            AlunoRepository alunoRepository,
-                            TransacaoRepository transacaoRepository,
-                            EmailService emailService) {
-        this.professorRepository = professorRepository;
-        this.alunoRepository = alunoRepository;
-        this.transacaoRepository = transacaoRepository;
-        this.emailService = emailService;
-    }
+                        AlunoRepository alunoRepository,
+                        TransacaoRepository transacaoRepository,
+                        EmailService emailService,
+                        UsuarioRepository usuarioRepository,
+                        InstituicaoRepository instituicaoRepository,
+                        DepartamentoRepository departamentoRepository) {
+    this.professorRepository = professorRepository;
+    this.alunoRepository = alunoRepository;
+    this.transacaoRepository = transacaoRepository;
+    this.emailService = emailService;
+    this.usuarioRepository = usuarioRepository;
+    this.instituicaoRepository = instituicaoRepository;
+    this.departamentoRepository = departamentoRepository;
+}
 
     // ── Dashboard ────────────────────────────────────────────────────────────
 
@@ -205,4 +224,45 @@ public class ProfessorService {
                 .valor(valor)
                 .build();
     }
+
+    @Transactional
+public ProfessorCriadoDTO cadastrar(ProfessorCadastroDTO dto) {
+    if (usuarioRepository.existsByEmail(dto.getEmail())) {
+        throw new RegraNegocioException("E-mail já cadastrado no sistema: " + dto.getEmail());
+    }
+    if (professorRepository.existsByCpf(dto.getCpf())) {
+        throw new RegraNegocioException("CPF já cadastrado no sistema: " + dto.getCpf());
+    }
+
+    Instituicao instituicao = instituicaoRepository.findById(dto.getInstituicaoId())
+            .orElseThrow(() -> new RecursoNaoEncontradoException("InstituSição não encontrada com id: " + dto.getInstituicaoId()));
+
+    Departamento departamento = departamentoRepository.findById(dto.getDepartamentoId())
+            .orElseThrow(() -> new RecursoNaoEncontradoException("Departamento não encontrado com id: " + dto.getDepartamentoId()));
+
+    Professor professor = new Professor(
+            null,
+            dto.getEmail(),
+            dto.getSenha(),
+            PerfilUsuario.PROFESSOR,
+            LocalDateTime.now(),
+            dto.getNome(),
+            dto.getCpf(),
+            CREDITO_SEMESTRAL,
+            departamento,
+            instituicao
+    );
+
+    Professor salvo = professorRepository.save(professor);
+
+    transacaoRepository.save(Transacao.builder()
+        .quantidadeMoedas(CREDITO_SEMESTRAL)
+        .dataHora(LocalDateTime.now())
+        .tipo(TipoTransacao.CREDITO_SEMESTRAL)
+        .motivo("Crédito semestral inicial")
+        .professor(salvo)
+        .build());
+        
+    return new ProfessorCriadoDTO(salvo.getId(), salvo.getNome(), salvo.getEmail(), salvo.getCpf());
+}
 }
