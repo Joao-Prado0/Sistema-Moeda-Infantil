@@ -2,6 +2,7 @@ import { Navigate, useLocation, Routes, Route } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoginPage from '../pages/LoginPage';
 import CadastroAlunoPage from '../pages/CadastroAlunoPage';
+import CadastroProfessorPage from '../pages/CadastroProfessorPage';
 import CadastroEmpresaPage from '../pages/CadastroEmpresaPage';
 import AlunoDashboard from '../pages/AlunoDashboardPage';
 import ProfessorDashboard from '../pages/ProfessorDashboardPage';
@@ -47,6 +48,7 @@ export function AppRoutes() {
           }
         />
         <Route path="/cadastro-aluno" element={<CadastroAlunoPage />} />
+        <Route path="/cadastro-professor" element={<CadastroProfessorPage />} />
         <Route path="/cadastro-empresa" element={<CadastroEmpresaPage />} />
         <Route
           path="/aluno/dashboard"

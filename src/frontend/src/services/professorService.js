@@ -1,6 +1,7 @@
 import professorApi from '../api/professor';
 
 export const professorService = {
+  cadastrar: (dados) => professorApi.cadastrar(dados),
   obterDashboard: (professorId) => professorApi.obterDashboard(professorId),
   enviarMoedas: (professorId, dados) => professorApi.enviarMoedas(professorId, dados),
   aplicarCreditoSemestral: () => professorApi.aplicarCreditoSemestral(),

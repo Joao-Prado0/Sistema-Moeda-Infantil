@@ -72,6 +72,7 @@ export const alunoApi = {
 };
 
 export const professorApi = {
+  cadastrar: (dados) => request('/professores', { method: 'POST', body: JSON.stringify(dados) }),
   obterDashboard: (professorId) =>
     request('/professores/me/dashboard', {
       headers: professorId ? { 'X-Professor-Id': professorId } : {},
@@ -139,4 +140,5 @@ export const empresaApi = {
 export const instituicaoApi = {
   listar: () => request('/instituicoes'),
   listarCursos: () => request('/instituicoes/cursos'),
+  listarDepartamentos: () => request('/departamentos'),
 };

@@ -1,6 +1,7 @@
 import { request } from '../services/api';
 
 export const professorApi = {
+  cadastrar: (dados) => request('/professores', { method: 'POST', body: JSON.stringify(dados) }),
   obterDashboard: (professorId) =>
     request('/professores/me/dashboard', {
       headers: professorId ? { 'X-Professor-Id': professorId } : {},

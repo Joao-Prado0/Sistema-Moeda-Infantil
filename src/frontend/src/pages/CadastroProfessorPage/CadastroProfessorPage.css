@@ -1,0 +1,25 @@
+/* ==========================================================================
+   Página: CadastroProfessorPage
+   ========================================================================== */
+
+.page-form-sm {
+  max-width: 680px;
+}
+
+.form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.form-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.15rem;
+  color: var(--brand-950, #120e3a);
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border, #e7e5f1);
+}
+

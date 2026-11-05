@@ -52,6 +52,11 @@
   padding-left: 2.75rem;
 }
 
+.input-wrap:has(.input-action) input,
+.input-wrap select {
+  padding-right: 2.75rem;
+}
+
 .input-icon {
   position: absolute;
   left: 0.9rem;

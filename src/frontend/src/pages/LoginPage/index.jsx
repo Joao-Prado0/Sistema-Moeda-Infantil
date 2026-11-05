@@ -12,6 +12,7 @@ import {
   Lock,
   Mail,
   Receipt,
+  School,
   Sparkles,
   Store,
 } from 'lucide-react';
@@ -150,7 +151,7 @@ export default function LoginPage() {
               onChange={(e) => setSenha(e.target.value)}
               required
             />
-            <button type="submit" className="custom-btn btn-primary btn-full" disabled={loading}>
+            <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={loading}>
               {loading ? (
                 <>
                   <LoaderCircle size={18} className="spin" /> Entrando...
@@ -175,6 +176,16 @@ export default function LoginPage() {
               <span className="choice-text">
                 <strong>Sou aluno</strong>
                 <small>Quero receber moedas</small>
+              </span>
+              <ChevronRight size={18} className="choice-arrow" />
+            </Link>
+            <Link to="/cadastro-professor" className="choice-card">
+              <span className="icon-badge icon-badge-professor">
+                <School size={20} />
+              </span>
+              <span className="choice-text">
+                <strong>Sou professor</strong>
+                <small>Quero distribuir moedas</small>
               </span>
               <ChevronRight size={18} className="choice-arrow" />
             </Link>
