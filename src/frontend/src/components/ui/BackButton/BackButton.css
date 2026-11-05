@@ -1,0 +1,22 @@
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text-muted, #5f5b7a);
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius, 12px);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+  color: var(--brand-900, #1d1757);
+  border-color: var(--border-strong, #d6d3e6);
+  background: var(--surface-muted, #fbfaff);
+  transform: translateX(-2px);
+}
+

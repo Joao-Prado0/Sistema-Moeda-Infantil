@@ -1,0 +1,236 @@
+/* ==========================================================================
+   Moeda Estudantil — Utilitários, Badges, Avatares e Animações
+   ========================================================================== */
+
+/* Badges de Perfil */
+.role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.role-badge.role-aluno {
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-200);
+}
+
+.role-badge.role-professor {
+  background: #fdf4ff;
+  color: #a21caf;
+  border: 1px solid #f0abfc;
+}
+
+.role-badge.role-empresa {
+  background: var(--gold-50);
+  color: var(--gold-700);
+  border: 1px solid var(--gold-300);
+}
+
+/* Status Badges */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.status-badge.status-active,
+.status-badge.status-utilizado {
+  background: var(--success-50);
+  color: var(--success-700);
+  border: 1px solid #a7f3d0;
+}
+
+.status-badge.status-disponivel {
+  background: var(--brand-50);
+  color: var(--brand-700);
+  border: 1px solid var(--brand-200);
+}
+
+.status-badge.status-expirado {
+  background: var(--danger-50);
+  color: var(--danger-700);
+  border: 1px solid var(--danger-200);
+}
+
+/* Avatares */
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--brand-600), var(--brand-800));
+  color: #ffffff;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.avatar.avatar-sm {
+  width: 32px;
+  height: 32px;
+  font-size: 0.82rem;
+}
+
+.avatar.avatar-md {
+  width: 42px;
+  height: 42px;
+  font-size: 0.95rem;
+}
+
+.avatar.avatar-lg {
+  width: 56px;
+  height: 56px;
+  font-size: 1.25rem;
+}
+
+.avatar.avatar-gold {
+  background: linear-gradient(135deg, var(--gold-400), var(--gold-700));
+  color: var(--brand-950);
+}
+
+/* Animações e Transições */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.reveal {
+  animation: fadeIn 0.35s var(--ease-out) both;
+}
+
+.spin {
+  animation: spin 1s linear infinite;
+}
+
+.page-transition {
+  min-height: calc(100vh - var(--header-h));
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* Cards e Contêineres Compartilhados */
+.card {
+  padding: 24px;
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius-xl, 24px);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--brand-950, #120e3a);
+}
+
+.card-title svg {
+  color: var(--brand-600, #4b3fd6);
+}
+
+.card-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 16px;
+  margin-bottom: 1.25rem;
+}
+
+.tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.page-heading h1 {
+  font-size: 1.85rem;
+  color: var(--brand-950, #120e3a);
+  margin-bottom: 0.35rem;
+}
+
+.page-heading p {
+  font-size: 0.95rem;
+  color: var(--text-muted, #5f5b7a);
+}
+
+.chip-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-pill, 9999px);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.metrics-3col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.25rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--text-muted, #5f5b7a);
+}
+
+.empty-illustration {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--surface-muted, #fbfaff);
+  color: var(--brand-500, #6a5ef0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.muted {
+  color: var(--text-muted, #5f5b7a);
+}
+
+.data-table-container {
+  overflow-x: auto;
+  border-radius: var(--radius, 12px);
+  border: 1px solid var(--border, #e7e5f1);
+}

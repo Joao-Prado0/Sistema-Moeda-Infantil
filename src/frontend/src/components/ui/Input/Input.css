@@ -1,0 +1,151 @@
+/* ==========================================================================
+   Componente: Input e Campos de Formulário
+   ========================================================================== */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
+}
+
+.field label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text, #16142e);
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.input-wrap input,
+.input-wrap select,
+.custom-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  color: var(--text, #16142e);
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border-strong, #d6d3e6);
+  border-radius: var(--radius, 12px);
+  transition: all var(--transition-fast, 0.18s ease);
+  outline: none;
+}
+
+.input-wrap input:focus,
+.input-wrap select:focus,
+.custom-input:focus {
+  border-color: var(--brand-600, #4b3fd6);
+  box-shadow: 0 0 0 3px var(--brand-100, #e8e6fe);
+  background: #ffffff;
+}
+
+.input-wrap input.has-icon,
+.input-wrap select.has-icon {
+  padding-left: 2.75rem;
+}
+
+.input-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-subtle, #8a87a3);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.select-chevron {
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-subtle, #8a87a3);
+  pointer-events: none;
+}
+
+.input-action {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #5f5b7a);
+  padding: 0.35rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.input-action:hover {
+  color: var(--brand-900, #1d1757);
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: var(--text-subtle, #8a87a3);
+}
+
+/* Força da Senha */
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.strength-bars {
+  display: flex;
+  gap: 0.3rem;
+  flex: 1;
+}
+
+.strength-bars span {
+  flex: 1;
+  height: 4px;
+  background: var(--border, #e7e5f1);
+  border-radius: 99px;
+  transition: background 0.25s ease;
+}
+
+.strength-1 .strength-bars span:nth-child(1) { background: #ef4444; }
+.strength-1 span { color: #ef4444; }
+
+.strength-2 .strength-bars span:nth-child(-n+2) { background: #f59e0b; }
+.strength-2 span { color: #f59e0b; }
+
+.strength-3 .strength-bars span:nth-child(-n+3) { background: #3b82f6; }
+.strength-3 span { color: #3b82f6; }
+
+.strength-4 .strength-bars span:nth-child(-n+4) { background: #10b981; }
+.strength-4 span { color: #10b981; }
+
+.match-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+}
+
+.match-hint.is-ok {
+  color: #059669;
+}
+
+.match-hint.is-pending {
+  color: #dc2626;
+}
+

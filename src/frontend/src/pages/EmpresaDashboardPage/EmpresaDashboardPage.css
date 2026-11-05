@@ -1,0 +1,30 @@
+/* ==========================================================================
+   Página: EmpresaDashboardPage
+   ========================================================================== */
+
+@import '../AlunoDashboardPage/AlunoDashboardPage.css';
+
+.empresa-action-banner {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius-xl, 24px);
+  padding: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.check-coupon-box {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius-xl, 24px);
+  padding: 2.5rem;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+

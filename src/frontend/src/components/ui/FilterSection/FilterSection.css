@@ -1,0 +1,25 @@
+.custom-filter-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border, #e7e5f1);
+}
+
+.custom-filter-section:last-child {
+  border-bottom: none;
+}
+
+.filter-section-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--brand-950, #120e3a);
+  margin: 0;
+}
+
+.filter-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+

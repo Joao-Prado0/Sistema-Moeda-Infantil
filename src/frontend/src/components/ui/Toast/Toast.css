@@ -1,0 +1,121 @@
+/* ==========================================================================
+   Componente: Toast e Notificações Flutuantes
+   ========================================================================== */
+
+.toast-region {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  pointer-events: none;
+  max-width: 420px;
+  width: calc(100% - 3rem);
+}
+
+.toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: var(--surface, #ffffff);
+  border-radius: var(--radius, 12px);
+  box-shadow: 0 12px 32px -8px rgba(29, 23, 87, 0.25);
+  pointer-events: auto;
+  overflow: hidden;
+  border: 1px solid var(--border, #e7e5f1);
+  animation: toastIn 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.toast.is-leaving {
+  animation: toastOut 0.25s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.toast p {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text, #16142e);
+  margin: 0;
+}
+
+.toast-sucesso {
+  border-left: 4px solid var(--success-700, #047857);
+}
+
+.toast-sucesso .toast-icon {
+  color: var(--success-700, #047857);
+}
+
+.toast-erro {
+  border-left: 4px solid var(--danger-600, #dc2626);
+}
+
+.toast-erro .toast-icon {
+  color: var(--danger-600, #dc2626);
+}
+
+.toast-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #5f5b7a);
+  cursor: pointer;
+  padding: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}
+
+.toast-close:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: rgba(29, 23, 87, 0.08);
+  animation: progress linear forwards;
+}
+
+.toast-sucesso .toast-progress {
+  background: var(--success-700, #047857);
+}
+
+.toast-erro .toast-progress {
+  background: var(--danger-600, #dc2626);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.94);
+  }
+}
+
+@keyframes progress {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+

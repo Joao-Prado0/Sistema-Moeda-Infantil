@@ -1,0 +1,331 @@
+/* ==========================================================================
+   Página: AlunoDashboardPage & Painel do Aluno
+   ========================================================================== */
+
+/* Banner de Boas-Vindas */
+.dashboard-banner {
+  background: linear-gradient(135deg, var(--brand-950, #120e3a), var(--brand-900, #1d1757) 70%, var(--brand-800, #29218a));
+  border-radius: var(--radius-xl, 24px);
+  padding: 2.25rem 2.5rem;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: var(--shadow-lg, 0 28px 56px -24px rgba(29, 23, 87, 0.35));
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-banner::after {
+  content: '';
+  position: absolute;
+  right: -60px;
+  top: -60px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(242, 169, 0, 0.18), transparent 70%);
+  pointer-events: none;
+}
+
+.dashboard-banner-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1;
+}
+
+.welcome-eyebrow {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gold-400, #ffc531);
+}
+
+.welcome-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+}
+
+.welcome-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  font-size: 0.88rem;
+  color: var(--brand-200, #d2cefc);
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Card de Saldo */
+.balance-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: var(--radius-lg, 18px);
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 220px;
+  z-index: 1;
+}
+
+.balance-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gold-300, #ffd76a);
+}
+
+.balance-amount {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  font-size: 2.2rem;
+  font-weight: 800;
+  color: #ffffff;
+  font-family: var(--font-display, 'Sora', sans-serif);
+}
+
+.balance-amount small {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gold-400, #ffc531);
+}
+
+/* Grids e Seções */
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius-lg, 18px);
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.stat-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-muted, #5f5b7a);
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--brand-950, #120e3a);
+}
+
+/* Catálogo de Vantagens */
+.catalog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.advantage-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius-lg, 18px);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.advantage-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--brand-500, #6a5ef0);
+  box-shadow: var(--shadow-md);
+}
+
+.advantage-image {
+  height: 160px;
+  background: var(--surface-muted, #fbfaff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  position: relative;
+  border-bottom: 1px solid var(--border, #e7e5f1);
+}
+
+.advantage-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.advantage-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0.75rem;
+}
+
+.advantage-company {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--gold-700, #8a5a00);
+}
+
+.advantage-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--brand-950, #120e3a);
+  margin: 0;
+}
+
+.advantage-desc {
+  font-size: 0.88rem;
+  color: var(--text-muted, #5f5b7a);
+  line-height: 1.45;
+  flex: 1;
+}
+
+.advantage-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border, #e7e5f1);
+}
+
+.advantage-cost {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--brand-600, #4b3fd6);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Tabelas de Dados e Extrato */
+.table-card {
+  background: var(--surface, #ffffff);
+  border: 1px solid var(--border, #e7e5f1);
+  border-radius: var(--radius-xl, 24px);
+  padding: 1.75rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.table-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.table-card-header h3 {
+  font-size: 1.25rem;
+  color: var(--brand-950, #120e3a);
+  margin: 0;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  border-radius: var(--radius, 12px);
+  border: 1px solid var(--border, #e7e5f1);
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.92rem;
+}
+
+.data-table th {
+  background: var(--surface-muted, #fbfaff);
+  padding: 0.85rem 1.25rem;
+  font-weight: 700;
+  color: var(--brand-950, #120e3a);
+  border-bottom: 1px solid var(--border, #e7e5f1);
+  white-space: nowrap;
+}
+
+.data-table td {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border, #e7e5f1);
+  color: var(--text, #16142e);
+}
+
+.data-table tr:last-child td {
+  border-bottom: none;
+}
+
+.data-table tr:hover td {
+  background: rgba(75, 63, 214, 0.02);
+}
+
+.extrato-amount {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.extrato-positive {
+  color: var(--success-700, #047857);
+}
+
+.extrato-negative {
+  color: var(--danger-600, #dc2626);
+}
+
+.extrato-empty {
+  padding: 3rem 1.5rem;
+  text-align: center;
+  color: var(--text-subtle, #8a87a3);
+}
+
+@media (max-width: 768px) {
+  .dashboard-banner {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.75rem 1.25rem;
+  }
+  .balance-card {
+    width: 100%;
+  }
+}
+

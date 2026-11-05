@@ -1,0 +1,20 @@
+.custom-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group-label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--brand-950, #120e3a);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.filter-group-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+

@@ -44,8 +44,18 @@ Projeto acadêmico da disciplina **Projeto de Software** (PUC Minas, Engenharia 
 Sistema-Moeda-Infantil/
 ├── doc/                  # Diagramas, wireframes e histórias de usuário
 ├── src/
-│   ├── backend/          # API REST em Spring Boot
-│   └── frontend/         # Interface em React + Vite
+│   ├── backend/          # API REST em Spring Boot (MVC, Services, Repositories)
+│   └── frontend/         # Interface em React 19 + Vite (Arquitetura Modular / Resources)
+│       ├── src/
+│       │   ├── components/layout/   # Navbar e Modais globais
+│       │   ├── components/ui/       # Componentes atômicos (Input, Select, Toast, ConfirmDialog)
+│       │   ├── contexts/            # AuthContext e ToastContext
+│       │   ├── hooks/               # useAuth, useCountUp
+│       │   ├── layouts/             # AppLayout (DashboardShell) e AuthLayout
+│       │   ├── resources/           # Módulos por Domínio/Ator (Auth, Aluno, Professor, Empresa)
+│       │   ├── routes/              # Configuração central de rotas e guards (routes.jsx)
+│       │   ├── services/            # Cliente HTTP centralizado (api.js)
+│       │   └── utils/               # Formatadores e máscaras
 └── README.md
 ```
 

@@ -1,0 +1,75 @@
+/* ==========================================================================
+   Moeda Estudantil — Design Tokens e Variáveis Globais
+   Índigo (#1D1757) + Dourado (#F2A900)
+   ========================================================================== */
+
+:root {
+  /* Paleta Índigo Principal */
+  --brand-950: #120e3a;
+  --brand-900: #1d1757;
+  --brand-800: #29218a;
+  --brand-700: #3c31b3;
+  --brand-600: #4b3fd6;
+  --brand-500: #6a5ef0;
+  --brand-200: #d2cefc;
+  --brand-100: #e8e6fe;
+  --brand-50: #f4f3ff;
+
+  /* Paleta Dourada / Mérito */
+  --gold-700: #8a5a00;
+  --gold-500: #f2a900;
+  --gold-400: #ffc531;
+  --gold-300: #ffd76a;
+  --gold-100: #fff1c7;
+  --gold-50: #fff9e8;
+
+  /* Cores de Superfície e Fundo */
+  --bg: #f6f5fb;
+  --surface: #ffffff;
+  --surface-muted: #fbfaff;
+  --text: #16142e;
+  --text-muted: #5f5b7a;
+  --text-subtle: #8a87a3;
+  --border: #e7e5f1;
+  --border-strong: #d6d3e6;
+
+  /* Status */
+  --success-700: #047857;
+  --success-500: #10b981;
+  --success-50: #ecfdf5;
+  --danger-700: #b91c1c;
+  --danger-600: #dc2626;
+  --danger-200: #fecaca;
+  --danger-50: #fef2f2;
+  --warning-500: #f59e0b;
+  --warning-50: #fffbeb;
+
+  /* Tipografia */
+  --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Sora', 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Raios de borda */
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(29, 23, 87, 0.06);
+  --shadow-md: 0 1px 3px rgba(29, 23, 87, 0.05), 0 12px 28px -14px rgba(29, 23, 87, 0.18);
+  --shadow-lg: 0 28px 56px -24px rgba(29, 23, 87, 0.35);
+  --shadow-brand: 0 10px 24px -10px rgba(75, 63, 214, 0.7);
+  --shadow-gold: 0 10px 24px -10px rgba(242, 169, 0, 0.8);
+
+  /* Transições e Animações */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-fast: 0.18s ease;
+  --transition-normal: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+
+  /* Dimensões comuns */
+  --header-h: 64px;
+  --sidebar-w: 260px;
+}
+
