@@ -111,45 +111,6 @@
   gap: 1.5rem;
 }
 
-.stat-card {
-  background: var(--surface, #ffffff);
-  border: 1px solid var(--border, #e7e5f1);
-  border-radius: var(--radius-lg, 18px);
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: var(--shadow-sm);
-}
-
-.stat-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.stat-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--text-muted, #5f5b7a);
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--brand-950, #120e3a);
-}
-
 /* Catálogo de Vantagens */
 .catalog-grid {
   display: grid;

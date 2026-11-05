@@ -14,6 +14,7 @@ import {
   Mail,
   MapPin,
   Receipt,
+  RotateCcw,
   Save,
   School,
   Trash2,
@@ -136,6 +137,29 @@ export default function AlunoDashboard() {
     }
   };
 
+  const handleReset = () => {
+    if (!aluno) return;
+    setFormData({
+      nome: aluno.nome || '',
+      email: aluno.email || '',
+      cpf: aluno.cpf || '',
+      rg: aluno.rg || '',
+      instituicaoId: aluno.instituicaoId || '',
+      cursoId: aluno.cursoId || '',
+      senha: '',
+      endereco: aluno.endereco || {
+        logradouro: '',
+        numero: '',
+        complemento: '',
+        bairro: '',
+        cidade: '',
+        estado: '',
+        cep: '',
+      },
+    });
+    toast.sucesso('Dados originais restaurados.');
+  };
+
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -182,19 +206,21 @@ export default function AlunoDashboard() {
   return (
     <DashboardShell titulo="Painel do Aluno" itens={ABAS} ativo={activeTab} onSelecionar={setActiveTab}>
       <div className="tab-panel">
-        <header className="page-heading reveal">
-          <h1>
-            Olá, {primeiroNome(aluno?.nome) || 'aluno'}{' '}
-            <span className="wave" aria-hidden="true">
-              👋
-            </span>
-          </h1>
-          <p>
-            {aluno?.cursoNome && aluno?.instituicaoNome
-              ? `${aluno.cursoNome} · ${aluno.instituicaoNome}`
-              : 'Acompanhe seu saldo e suas movimentações de mérito acadêmico.'}
-          </p>
-        </header>
+        {activeTab !== 'perfil' && (
+          <header className="page-heading reveal">
+            <h1>
+              Olá, {primeiroNome(aluno?.nome) || 'aluno'}{' '}
+              <span className="wave" aria-hidden="true">
+                👋
+              </span>
+            </h1>
+            <p>
+              {aluno?.cursoNome && aluno?.instituicaoNome
+                ? `${aluno.cursoNome} · ${aluno.instituicaoNome}`
+                : 'Acompanhe seu saldo e suas movimentações de mérito acadêmico.'}
+            </p>
+          </header>
+        )}
 
         {carregando ? (
           <div style={{ display: 'grid', placeItems: 'center', padding: '60px 0' }}>
@@ -404,17 +430,27 @@ export default function AlunoDashboard() {
                     >
                       <Trash2 size={16} /> Excluir conta
                     </button>
-                    <button type="submit" className="btn btn-primary" disabled={loading}>
-                      {loading ? (
-                        <>
-                          <LoaderCircle size={18} className="spin" /> Salvando...
-                        </>
-                      ) : (
-                        <>
-                          <Save size={18} /> Salvar alterações
-                        </>
-                      )}
-                    </button>
+                    <div className="form-actions-right">
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        onClick={handleReset}
+                        disabled={loading}
+                      >
+                        <RotateCcw size={15} /> Cancelar
+                      </button>
+                      <button type="submit" className="btn btn-primary" disabled={loading}>
+                        {loading ? (
+                          <>
+                            <LoaderCircle size={18} className="spin" /> Salvando...
+                          </>
+                        ) : (
+                          <>
+                            <Save size={18} /> Salvar alterações
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </form>
 
@@ -436,5 +472,3 @@ export default function AlunoDashboard() {
     </DashboardShell>
   );
 }
-
-

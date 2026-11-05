@@ -23,12 +23,12 @@ export async function request(endpoint, options = {}) {
   }
 
   const config = {
+    ...options,
     headers: {
       'Content-Type': 'application/json',
       ...authHeaders,
       ...options.headers,
     },
-    ...options,
   };
 
   const response = await fetch(`${API_BASE}${endpoint}`, config);
@@ -72,7 +72,10 @@ export const alunoApi = {
 };
 
 export const professorApi = {
+  buscarPorId: (id) => request(`/professores/${id}`),
   cadastrar: (dados) => request('/professores', { method: 'POST', body: JSON.stringify(dados) }),
+  atualizar: (id, dados) => request(`/professores/${id}`, { method: 'PUT', body: JSON.stringify(dados) }),
+  deletar: (id) => request(`/professores/${id}`, { method: 'DELETE' }),
   obterDashboard: (professorId) =>
     request('/professores/me/dashboard', {
       headers: professorId ? { 'X-Professor-Id': professorId } : {},

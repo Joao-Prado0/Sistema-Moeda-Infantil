@@ -7,13 +7,18 @@ import com.example.moeda_estudantil.dto.EnderecoDTO;
 import com.example.moeda_estudantil.exception.RecursoNaoEncontradoException;
 import com.example.moeda_estudantil.exception.RegraNegocioException;
 import com.example.moeda_estudantil.model.Aluno;
+import com.example.moeda_estudantil.model.Cupom;
 import com.example.moeda_estudantil.model.Curso;
 import com.example.moeda_estudantil.model.Endereco;
 import com.example.moeda_estudantil.model.Instituicao;
+import com.example.moeda_estudantil.model.Transacao;
 import com.example.moeda_estudantil.model.enums.PerfilUsuario;
+import com.example.moeda_estudantil.model.enums.TipoTransacao;
 import com.example.moeda_estudantil.repository.AlunoRepository;
+import com.example.moeda_estudantil.repository.CupomRepository;
 import com.example.moeda_estudantil.repository.CursoRepository;
 import com.example.moeda_estudantil.repository.InstituicaoRepository;
+import com.example.moeda_estudantil.repository.TransacaoRepository;
 import com.example.moeda_estudantil.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,15 +34,21 @@ public class AlunoService {
     private final UsuarioRepository usuarioRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final CursoRepository cursoRepository;
+    private final CupomRepository cupomRepository;
+    private final TransacaoRepository transacaoRepository;
 
     public AlunoService(AlunoRepository alunoRepository,
                         UsuarioRepository usuarioRepository,
                         InstituicaoRepository instituicaoRepository,
-                        CursoRepository cursoRepository) {
+                        CursoRepository cursoRepository,
+                        CupomRepository cupomRepository,
+                        TransacaoRepository transacaoRepository) {
         this.alunoRepository = alunoRepository;
         this.usuarioRepository = usuarioRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.cursoRepository = cursoRepository;
+        this.cupomRepository = cupomRepository;
+        this.transacaoRepository = transacaoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -133,6 +144,25 @@ public class AlunoService {
     public void deletar(Long id) {
         Aluno aluno = alunoRepository.findById(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Aluno não encontrado com id: " + id));
+
+        // Desassocia ou remove cupons vinculados
+        List<Cupom> cupons = cupomRepository.findByAlunoId(id);
+        if (!cupons.isEmpty()) {
+            cupomRepository.deleteAll(cupons);
+        }
+
+        // Desassocia ou remove transações vinculadas
+        List<Transacao> transacoes = transacaoRepository.findByAlunoId(id);
+        for (Transacao t : transacoes) {
+            if (t.getTipo() == TipoTransacao.RESGATE_VANTAGEM || t.getProfessor() == null) {
+                transacaoRepository.delete(t);
+            } else {
+                // Mantém o histórico do professor desvinculando o aluno excluído
+                t.setAluno(null);
+                transacaoRepository.save(t);
+            }
+        }
+
         alunoRepository.delete(aluno);
     }
 
@@ -180,4 +210,3 @@ public class AlunoService {
                 .build();
     }
 }
-

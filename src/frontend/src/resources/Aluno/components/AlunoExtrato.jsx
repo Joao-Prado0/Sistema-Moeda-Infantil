@@ -24,31 +24,40 @@ export default function AlunoExtrato({ dashboard }) {
       <div className="metrics-3col">
         <article className="stat-card reveal" style={{ '--i': 1 }}>
           <span className="icon-badge icon-badge-gold">
-            <Wallet size={20} />
+            <Wallet size={22} />
           </span>
-          <div>
+          <div className="stat-content">
             <span className="stat-label">Saldo atual</span>
-            <strong className="stat-value">{formatarMoedas(saldoAnimado)} moedas</strong>
+            <div className="stat-value-wrap">
+              <strong className="stat-value">{formatarMoedas(saldoAnimado)}</strong>
+              <span className="stat-unit">moedas</span>
+            </div>
           </div>
         </article>
 
         <article className="stat-card reveal" style={{ '--i': 2 }}>
           <span className="icon-badge icon-badge-brand">
-            <Coins size={20} />
+            <Coins size={22} />
           </span>
-          <div>
+          <div className="stat-content">
             <span className="stat-label">Recebidas no total</span>
-            <strong className="stat-value">{formatarMoedas(totalRecebidoAnimado)}</strong>
+            <div className="stat-value-wrap">
+              <strong className="stat-value">{formatarMoedas(totalRecebidoAnimado)}</strong>
+              <span className="stat-unit">moedas</span>
+            </div>
           </div>
         </article>
 
         <article className="stat-card reveal" style={{ '--i': 3 }}>
           <span className="icon-badge icon-badge-brand">
-            <Gift size={20} />
+            <Gift size={22} />
           </span>
-          <div>
+          <div className="stat-content">
             <span className="stat-label">Trocadas no total</span>
-            <strong className="stat-value">{formatarMoedas(totalTrocadoAnimado)}</strong>
+            <div className="stat-value-wrap">
+              <strong className="stat-value">{formatarMoedas(totalTrocadoAnimado)}</strong>
+              <span className="stat-unit">moedas</span>
+            </div>
           </div>
         </article>
       </div>

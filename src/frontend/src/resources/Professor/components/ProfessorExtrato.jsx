@@ -24,31 +24,40 @@ export default function ProfessorExtrato({ dashboard }) {
       <div className="metrics-3col">
         <article className="stat-card reveal" style={{ '--i': 1 }}>
           <span className="icon-badge icon-badge-gold">
-            <Wallet size={20} />
+            <Wallet size={22} />
           </span>
-          <div>
+          <div className="stat-content">
             <span className="stat-label">Saldo disponível</span>
-            <strong className="stat-value">{formatarMoedas(saldoAnimado)} moedas</strong>
+            <div className="stat-value-wrap">
+              <strong className="stat-value">{formatarMoedas(saldoAnimado)}</strong>
+              <span className="stat-unit">moedas</span>
+            </div>
           </div>
         </article>
 
         <article className="stat-card reveal" style={{ '--i': 2 }}>
           <span className="icon-badge icon-badge-brand">
-            <Coins size={20} />
+            <Coins size={22} />
           </span>
-          <div>
+          <div className="stat-content">
             <span className="stat-label">Crédito por semestre</span>
-            <strong className="stat-value">{formatarMoedas(creditoSemestral)} moedas</strong>
+            <div className="stat-value-wrap">
+              <strong className="stat-value">{formatarMoedas(creditoSemestral)}</strong>
+              <span className="stat-unit">moedas</span>
+            </div>
           </div>
         </article>
 
         <article className="stat-card reveal" style={{ '--i': 3 }}>
           <span className="icon-badge icon-badge-brand">
-            <History size={20} />
+            <History size={22} />
           </span>
-          <div>
+          <div className="stat-content">
             <span className="stat-label">Enviadas no total</span>
-            <strong className="stat-value">{formatarMoedas(totalEnviadoAnimado)} moedas</strong>
+            <div className="stat-value-wrap">
+              <strong className="stat-value">{formatarMoedas(totalEnviadoAnimado)}</strong>
+              <span className="stat-unit">moedas</span>
+            </div>
           </div>
         </article>
       </div>

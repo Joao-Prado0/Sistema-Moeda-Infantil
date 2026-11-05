@@ -10,6 +10,7 @@ import {
   LoaderCircle,
   Lock,
   Mail,
+  RotateCcw,
   Save,
   Store,
   TicketCheck,
@@ -76,6 +77,17 @@ export default function EmpresaDashboard() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: name === 'cnpj' ? mascaras.cnpj(value) : value }));
+  };
+
+  const handleReset = () => {
+    if (!empresa) return;
+    setFormData({
+      nomeFantasia: empresa.nomeFantasia || '',
+      email: empresa.email || '',
+      cnpj: empresa.cnpj || '',
+      senha: '',
+    });
+    toast.sucesso('Dados originais restaurados.');
   };
 
   const handleUpdate = async (e) => {
@@ -215,17 +227,27 @@ export default function EmpresaDashboard() {
                   >
                     <Trash2 size={16} /> Excluir cadastro
                   </button>
-                  <button type="submit" className="btn btn-primary" disabled={loading}>
-                    {loading ? (
-                      <>
-                        <LoaderCircle size={18} className="spin" /> Salvando...
-                      </>
-                    ) : (
-                      <>
-                        <Save size={18} /> Salvar alterações
-                      </>
-                    )}
-                  </button>
+                  <div className="form-actions-right">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={handleReset}
+                      disabled={loading}
+                    >
+                      <RotateCcw size={15} /> Cancelar
+                    </button>
+                    <button type="submit" className="btn btn-primary" disabled={loading}>
+                      {loading ? (
+                        <>
+                          <LoaderCircle size={18} className="spin" /> Salvando...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={18} /> Salvar alterações
+                        </>
+                      )}
+                    </button>
+                  </div>
                 </div>
               </form>
             )}
@@ -246,5 +268,3 @@ export default function EmpresaDashboard() {
     </DashboardShell>
   );
 }
-
-
