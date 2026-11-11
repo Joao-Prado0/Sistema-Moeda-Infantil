@@ -14,6 +14,7 @@ public interface TransacaoRepository extends JpaRepository<Transacao, Long> {
     List<Transacao> findByAlunoId(Long alunoId);
     List<Transacao> findByProfessorId(Long professorId);
     List<Transacao> findByTipo(TipoTransacao tipo);
+    boolean existsByTipoAndMotivo(TipoTransacao tipo, String motivo);
 
     @Query("SELECT COALESCE(SUM(t.quantidadeMoedas), 0) FROM Transacao t " +
            "WHERE t.aluno.id = :alunoId AND t.tipo IN :tipos")

@@ -28,9 +28,9 @@ import DashboardShell from '../../layouts/AppLayout';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import FormSkeleton from '../../components/ui/Input/FormSkeleton';
 import { Field, PasswordField, PasswordStrength, SelectField } from '../../components/ui/Input';
-import AlunoExtrato from '../../resources/Aluno/components/AlunoExtrato';
-import AlunoCatalogoVantagens from '../../resources/Aluno/components/AlunoCatalogoVantagens';
-import AlunoCupons from '../../resources/Aluno/components/AlunoCupons';
+import AlunoExtrato from './components/AlunoExtrato';
+import AlunoCatalogoVantagens from './components/AlunoCatalogoVantagens';
+import AlunoCupons from './components/AlunoCupons';
 import { iniciais, mascaras, membroDesde, primeiroNome } from '../../utils/formatters';
 
 const ABAS = [

@@ -25,8 +25,8 @@ import { professorApi, instituicaoApi } from '../../services/api';
 import DashboardShell from '../../layouts/AppLayout';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { Field, PasswordField, PasswordStrength, SelectField } from '../../components/ui/Input';
-import ProfessorExtrato from '../../resources/Professor/components/ProfessorExtrato';
-import ProfessorEnviarMoedas from '../../resources/Professor/components/ProfessorEnviarMoedas';
+import ProfessorExtrato from './components/ProfessorExtrato';
+import ProfessorEnviarMoedas from './components/ProfessorEnviarMoedas';
 import { iniciais, mascaras, membroDesde } from '../../utils/formatters';
 
 const ABAS = [

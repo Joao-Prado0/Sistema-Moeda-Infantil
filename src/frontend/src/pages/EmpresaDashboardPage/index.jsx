@@ -23,8 +23,8 @@ import DashboardShell from '../../layouts/AppLayout';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import FormSkeleton from '../../components/ui/Input/FormSkeleton';
 import { Field, PasswordField, PasswordStrength } from '../../components/ui/Input';
-import EmpresaVantagens from '../../resources/Empresa/components/EmpresaVantagens';
-import EmpresaConferirCupons from '../../resources/Empresa/components/EmpresaConferirCupons';
+import EmpresaVantagens from './components/EmpresaVantagens';
+import EmpresaConferirCupons from './components/EmpresaConferirCupons';
 import { iniciais, mascaras, membroDesde } from '../../utils/formatters';
 
 const SECOES = [

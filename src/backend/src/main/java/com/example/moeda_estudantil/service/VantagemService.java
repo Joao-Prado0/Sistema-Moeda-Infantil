@@ -16,6 +16,8 @@ import com.example.moeda_estudantil.repository.TransacaoRepository;
 import com.example.moeda_estudantil.repository.VantagemRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -92,19 +94,40 @@ public class VantagemService {
         // O @PrePersist vai gerar o codigo UUID e dataResgate automaticamente
         Cupom cupomSalvo = cupomRepository.save(cupom);
 
-        // Enviar e-mail (mock) após confirmar a transação
-        String emailEmpresa = vantagem.getEmpresa() != null ? vantagem.getEmpresa().getEmail() : "";
-        emailService.enviarCupom(
-                aluno.getEmail(),
-                emailEmpresa,
-                aluno.getNome(),
-                vantagem.getTitulo(),
-                cupomSalvo.getCodigo().toString()
-        );
-
-        String nomeEmpresa = vantagem.getEmpresa() != null
+        final String nomeEmpresa = vantagem.getEmpresa() != null
                 ? vantagem.getEmpresa().getNomeFantasia()
-                : null;
+                : "";
+        final String emailEmpresa = vantagem.getEmpresa() != null ? vantagem.getEmpresa().getEmail() : "";
+        final String emailAluno = aluno.getEmail();
+        final String nomeAluno = aluno.getNome();
+        final String cpfAluno = aluno.getCpf();
+        final String tituloVantagem = vantagem.getTitulo();
+        final String codigoCupom = cupomSalvo.getCodigo().toString();
+
+        // Enviar e-mails após o commit da transação de forma assíncrona (US08 e US17)
+        executarAposCommit(() -> {
+            try {
+                emailService.enviarCupomAluno(emailAluno, codigoCupom, tituloVantagem, nomeEmpresa);
+                if (emailEmpresa != null && !emailEmpresa.isBlank()) {
+                    emailService.enviarAvisoResgateEmpresa(
+                            emailEmpresa,
+                            codigoCupom,
+                            tituloVantagem,
+                            nomeAluno,
+                            mascararCpf(cpfAluno)
+                    );
+                }
+                emailService.enviarCupom(
+                        emailAluno,
+                        emailEmpresa,
+                        nomeAluno,
+                        tituloVantagem,
+                        codigoCupom
+                );
+            } catch (Exception e) {
+                // Falha no envio nunca desfaz o resgate ou o cupom
+            }
+        });
 
         return CupomResponseDTO.builder()
                 .id(cupomSalvo.getId())
@@ -116,6 +139,28 @@ public class VantagemService {
                 .status(cupomSalvo.getStatus())
                 .dataResgate(cupomSalvo.getDataResgate())
                 .build();
+    }
+
+    private void executarAposCommit(Runnable acao) {
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    acao.run();
+                }
+            });
+        } else {
+            acao.run();
+        }
+    }
+
+    private String mascararCpf(String cpf) {
+        if (cpf == null || cpf.isBlank()) return "***";
+        String digits = cpf.replaceAll("\\D", "");
+        if (digits.length() == 11) {
+            return "***." + digits.substring(3, 6) + "." + digits.substring(6, 9) + "-**";
+        }
+        return "***";
     }
 
     private VantagemResponseDTO toVantagemResponseDTO(Vantagem v) {
