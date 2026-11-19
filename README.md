@@ -6,6 +6,47 @@ Projeto acadêmico da disciplina **Projeto de Software** (PUC Minas, Engenharia 
 
 ---
 
+## Sistema implantado
+
+| Parte | Serviço | Endereço |
+|---|---|---|
+| **Aplicação (frontend)** | Vercel | https://sistema-moeda-estudantil-seven.vercel.app |
+| API (backend) | Render | https://moeda-estudantil-api-hh22.onrender.com |
+| Banco de dados | Neon (PostgreSQL) | acesso restrito |
+
+> **Primeiro acesso lento:** o backend usa o plano gratuito do Render, que suspende o servidor após 15 minutos sem uso. A primeira requisição pode levar até cerca de 1 minuto. Depois disso o sistema responde normalmente.
+
+### Contas para teste
+
+Todas com a senha `senha123`.
+
+| Perfil | Login (e-mail) |
+|---|---|
+| Aluno | `maria.silva@pucminas.edu.br` |
+| Aluno | `pedro.alves@pucminas.edu.br` |
+| Aluno | `carla.dias@pucminas.edu.br` |
+| Professor | `joao.souza@pucminas.br` |
+| Professor | `ana.lima@pucminas.br` |
+| Empresa parceira | `cantina.central@parceiro.com` |
+| Empresa parceira | `secretaria@parceiro.com` |
+| Empresa parceira | `papelaria.campus@parceiro.com` |
+| Empresa parceira | `copiadora.up@parceiro.com` |
+| Empresa parceira | `livraria.saber@parceiro.com` |
+
+O PDF de entrega com esses acessos está em [`doc/Lab04-Sprint2-Acesso.pdf`](doc/Lab04-Sprint2-Acesso.pdf).
+
+### Arquitetura da implantação
+
+```
+Navegador ──▶ Vercel (React/Vite) ──/api/*──▶ Render (Spring Boot, Docker) ──▶ Neon (PostgreSQL)
+```
+
+- O frontend é estático. O arquivo `src/frontend/vercel.json` encaminha as chamadas `/api/*` para o backend no Render.
+- O backend é construído a partir de `src/backend/Dockerfile` (Root Directory `src/backend`).
+- A conexão com o banco e a chave administrativa vêm de variáveis de ambiente no Render (veja abaixo).
+
+---
+
 ## Funcionalidades
 
 **Aluno**
@@ -65,21 +106,53 @@ Sistema-Moeda-Infantil/
 
 - JDK 21 ou superior
 - Node.js 18 ou superior e npm
+- Git
 - Acesso à internet (o banco fica no Neon)
+- Docker (apenas se quiser rodar o backend em contêiner)
 
 ---
 
-## Como rodar
+## Como rodar localmente
+
+### 0. Clonar o repositório
+
+```bash
+git clone https://github.com/Joao-Prado0/Sistema-Moeda-Infantil.git
+cd Sistema-Moeda-Infantil
+```
 
 ### 1. Backend
 
-```bash
+O banco é um PostgreSQL no Neon. A senha **não** deve ficar no código: informe-a por variável de ambiente antes de subir a API (peça a senha atual ao grupo).
+
+**Windows (PowerShell):**
+
+```powershell
 cd src/backend
-./mvnw spring-boot:run          # Linux/macOS
-mvnw.cmd spring-boot:run        # Windows
+$env:SPRING_DATASOURCE_PASSWORD = "SENHA_DO_BANCO"
+.\mvnw.cmd spring-boot:run
 ```
 
-A API sobe em `http://localhost:8080`.
+**Linux/macOS:**
+
+```bash
+cd src/backend
+export SPRING_DATASOURCE_PASSWORD="SENHA_DO_BANCO"
+./mvnw spring-boot:run
+```
+
+A API sobe em `http://localhost:8080`. Para testar rapidamente: `http://localhost:8080/api/instituicoes`.
+
+Variáveis de ambiente aceitas (todas opcionais, exceto a senha do banco):
+
+| Variável | Para que serve | Padrão |
+|---|---|---|
+| `SPRING_DATASOURCE_URL` | URL JDBC do PostgreSQL | banco Neon do projeto |
+| `SPRING_DATASOURCE_USERNAME` | Usuário do banco | `neondb_owner` |
+| `SPRING_DATASOURCE_PASSWORD` | Senha do banco | (obrigatória) |
+| `ADMIN_KEY` | Chave do endpoint administrativo (`X-Admin-Key`) | `admin-secret-key` |
+| `PORT` | Porta HTTP | `8080` |
+| `APP_EMAIL_ENABLED` | Liga o envio real de e-mail | `false` |
 
 Para rodar os testes:
 
@@ -87,13 +160,13 @@ Para rodar os testes:
 ./mvnw test
 ```
 
-> **Configuração do banco:** a conexão está em `src/backend/src/main/resources/application.properties`. Antes de compartilhar o projeto, troque a senha do banco por variáveis de ambiente (`SPRING_DATASOURCE_PASSWORD`) e não suba o arquivo com a senha real.
+Para usar um banco local em memória (H2), comente a conexão do Neon e descomente o bloco H2 em `src/backend/src/main/resources/application.properties`.
 
-Para usar um banco local em memória (H2), descomente o bloco H2 no mesmo arquivo.
-
-Ao iniciar, a classe `DataLoader` cria dados de exemplo (instituição, empresas parceiras e vantagens) caso as tabelas estejam vazias.
+Ao iniciar, a classe `DataLoader` cria dados de exemplo (instituição, cursos, empresas parceiras, professores, alunos e vantagens) caso ainda não existam. As contas de teste estão na seção [Sistema implantado](#sistema-implantado).
 
 ### 2. Frontend
+
+Em outro terminal:
 
 ```bash
 cd src/frontend
@@ -101,7 +174,31 @@ npm install
 npm run dev
 ```
 
-A interface fica em `http://localhost:5173`. As chamadas para `/api` são encaminhadas para o backend (confira a configuração de proxy em `vite.config.js`).
+A interface fica em `http://localhost:5173`. As chamadas para `/api` são encaminhadas para o backend em `localhost:8080` (proxy configurado em `vite.config.js`). Mantenha o backend rodando.
+
+Para gerar a versão de produção: `npm run build` (saída em `dist/`).
+
+### 3. Rodar o backend com Docker (opcional)
+
+```bash
+cd src/backend
+docker build -t moeda-estudantil-api .
+docker run -p 8080:8080 -e SPRING_DATASOURCE_PASSWORD="SENHA_DO_BANCO" moeda-estudantil-api
+```
+
+---
+
+## Como implantar
+
+**Backend (Render)**
+1. Novo **Web Service** apontando para este repositório, branch `main`.
+2. **Language:** Docker. **Root Directory:** `src/backend`.
+3. Variáveis de ambiente: `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME`, `SPRING_DATASOURCE_PASSWORD` e `ADMIN_KEY`.
+
+**Frontend (Vercel)**
+1. Em `src/frontend/vercel.json`, confira se o destino de `/api/:path*` é a URL do backend no Render.
+2. Pelo terminal, a partir de `src/frontend`: `npm i -g vercel`, `vercel login` e `vercel --prod`.
+   Alternativa: importar o repositório na Vercel com **Root Directory** `src/frontend` (framework Vite, saída `dist`).
 
 ---
 
