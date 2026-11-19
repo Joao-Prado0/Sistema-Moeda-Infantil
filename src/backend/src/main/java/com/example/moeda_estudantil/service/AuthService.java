@@ -8,6 +8,7 @@ import com.example.moeda_estudantil.model.EmpresaParceira;
 import com.example.moeda_estudantil.model.Professor;
 import com.example.moeda_estudantil.model.Usuario;
 import com.example.moeda_estudantil.repository.UsuarioRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UsuarioRepository usuarioRepository;
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public AuthService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
@@ -25,7 +27,7 @@ public class AuthService {
         Usuario usuario = usuarioRepository.findByEmail(dto.getEmail())
                 .orElseThrow(() -> new RegraNegocioException("Credenciais inválidas. Verifique o e-mail e a senha informados."));
 
-        if (!usuario.getSenha().equals(dto.getSenha())) {
+        if (!senhaConfere(dto.getSenha(), usuario.getSenha())) {
             throw new RegraNegocioException("Credenciais inválidas. Verifique o e-mail e a senha informados.");
         }
 
@@ -52,6 +54,17 @@ public class AuthService {
                 .saldo(saldo)
                 .token(token)
                 .build();
+    }
+
+    /** Aceita senhas salvas em BCrypt ($2a$/$2b$/$2y$) ou em texto puro. */
+    private boolean senhaConfere(String senhaInformada, String senhaSalva) {
+        if (senhaInformada == null || senhaSalva == null) {
+            return false;
+        }
+        if (senhaSalva.matches("^\\$2[aby]\\$\\d{2}\\$.{53}$")) {
+            return passwordEncoder.matches(senhaInformada, senhaSalva);
+        }
+        return senhaSalva.equals(senhaInformada);
     }
 }
 
