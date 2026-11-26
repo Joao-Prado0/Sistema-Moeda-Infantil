@@ -8,7 +8,6 @@ import com.example.moeda_estudantil.dto.ProfessorCadastroDTO;
 import com.example.moeda_estudantil.dto.ProfessorCriadoDTO;
 import com.example.moeda_estudantil.dto.ProfessorDashboardDTO;
 import com.example.moeda_estudantil.dto.ProfessorResponseDTO;
-import com.example.moeda_estudantil.exception.ConflitoException;
 import com.example.moeda_estudantil.exception.RecursoNaoEncontradoException;
 import com.example.moeda_estudantil.exception.RegraNegocioException;
 import com.example.moeda_estudantil.model.Aluno;
@@ -29,7 +28,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
@@ -38,8 +36,8 @@ import java.util.stream.Collectors;
 @Service
 public class ProfessorService {
 
-    /** Crédito semestral padrão em moedas. */
-    public static final double CREDITO_SEMESTRAL = 1000.0;
+    /** Crédito semestral padrão em moedas (regra em {@link CreditoSemestralService}). */
+    public static final double CREDITO_SEMESTRAL = CreditoSemestralService.VALOR_SEMESTRAL;
 
     private final ProfessorRepository professorRepository;
     private final AlunoRepository alunoRepository;
@@ -182,85 +180,6 @@ public class ProfessorService {
                 .nomeAluno(aluno.getNome())
                 .saldoRestanteProfessor(professor.getSaldo())
                 .build();
-    }
-
-    // ── Crédito semestral ────────────────────────────────────────────────────
-
-    /**
-     * Aplica o crédito semestral acumulável de 1.000 moedas para todos os professores em uma única transação,
-     * garantindo idempotência para o mesmo período semestral.
-     *
-     * @param semestre Período opcional (ex: "2026/2"). Se nulo, calculado a partir da data atual.
-     * @return Quantidade de professores que receberam o crédito.
-     */
-    @Transactional
-    public int aplicarCreditoSemestralIdempotente(String semestre) {
-        if (semestre == null || semestre.isBlank()) {
-            LocalDate agora = LocalDate.now();
-            int mes = agora.getMonthValue();
-            semestre = agora.getYear() + "/" + (mes <= 6 ? "1" : "2");
-        }
-
-        String motivo = "Crédito semestral " + semestre;
-
-        // Verificação real de idempotência no banco de dados
-        if (transacaoRepository.existsByTipoAndMotivo(TipoTransacao.CREDITO_SEMESTRAL, motivo)) {
-            throw new ConflitoException("O crédito semestral para o período " + semestre + " já foi aplicado anteriormente.");
-        }
-
-        List<Professor> professores = professorRepository.findAll();
-        if (professores.isEmpty()) {
-            return 0;
-        }
-
-        LocalDateTime agora = LocalDateTime.now();
-        for (Professor professor : professores) {
-            professor.setSaldo(professor.getSaldo() + CREDITO_SEMESTRAL);
-            professorRepository.save(professor);
-
-            Transacao transacao = Transacao.builder()
-                    .quantidadeMoedas(CREDITO_SEMESTRAL)
-                    .dataHora(agora)
-                    .tipo(TipoTransacao.CREDITO_SEMESTRAL)
-                    .motivo(motivo)
-                    .professor(professor)
-                    .build();
-            transacaoRepository.save(transacao);
-        }
-
-        return professores.size();
-    }
-
-    /**
-     * Adiciona {@value #CREDITO_SEMESTRAL} moedas ao saldo do professor
-     * e registra uma {@link TipoTransacao#CREDITO_SEMESTRAL} no histórico.
-     */
-    @Transactional
-    public void aplicarCreditoSemestral(Long professorId) {
-        Professor professor = buscarProfessorOuLancar(professorId);
-
-        professor.setSaldo(professor.getSaldo() + CREDITO_SEMESTRAL);
-        professorRepository.save(professor);
-
-        transacaoRepository.save(Transacao.builder()
-                .quantidadeMoedas(CREDITO_SEMESTRAL)
-                .dataHora(LocalDateTime.now())
-                .tipo(TipoTransacao.CREDITO_SEMESTRAL)
-                .motivo("Crédito semestral")
-                .professor(professor)
-                .build());
-    }
-
-    /**
-     * Aplica o crédito semestral acumulável para todos os professores cadastrados.
-     */
-    @Transactional
-    public List<Professor> aplicarCreditoSemestralEmLote() {
-        List<Professor> professores = professorRepository.findAll();
-        for (Professor prof : professores) {
-            aplicarCreditoSemestral(prof.getId());
-        }
-        return professores;
     }
 
     // ── CRUD Professor (Perfil, Atualização, Exclusão) ─────────────────────────

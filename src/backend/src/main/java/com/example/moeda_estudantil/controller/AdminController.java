@@ -2,7 +2,7 @@ package com.example.moeda_estudantil.controller;
 
 import com.example.moeda_estudantil.dto.CreditoSemestralRequestDTO;
 import com.example.moeda_estudantil.exception.AcessoNegadoException;
-import com.example.moeda_estudantil.service.ProfessorService;
+import com.example.moeda_estudantil.service.CreditoSemestralService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -21,12 +20,12 @@ import java.util.Map;
 @CrossOrigin(origins = "*")
 public class AdminController {
 
-    private final ProfessorService professorService;
+    private final CreditoSemestralService creditoSemestralService;
     private final String adminKey;
 
-    public AdminController(ProfessorService professorService,
+    public AdminController(CreditoSemestralService creditoSemestralService,
                            @Value("${app.admin.key:${ADMIN_KEY:admin-secret-key}}") String adminKey) {
-        this.professorService = professorService;
+        this.creditoSemestralService = creditoSemestralService;
         this.adminKey = adminKey;
     }
 
@@ -45,9 +44,9 @@ public class AdminController {
 
         String semestre = (dto != null && dto.getSemestre() != null && !dto.getSemestre().isBlank())
                 ? dto.getSemestre().trim()
-                : calcularSemestreAtual();
+                : creditoSemestralService.semestreAtual();
 
-        int totalCreditados = professorService.aplicarCreditoSemestralIdempotente(semestre);
+        int totalCreditados = creditoSemestralService.aplicarParaTodos(semestre);
 
         Map<String, Object> resposta = new LinkedHashMap<>();
         resposta.put("semestre", semestre);
@@ -61,11 +60,5 @@ public class AdminController {
         }
 
         return ResponseEntity.ok(resposta);
-    }
-
-    private String calcularSemestreAtual() {
-        LocalDate agora = LocalDate.now();
-        int mes = agora.getMonthValue();
-        return agora.getYear() + "/" + (mes <= 6 ? "1" : "2");
     }
 }
