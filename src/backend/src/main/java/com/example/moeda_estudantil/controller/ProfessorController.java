@@ -7,6 +7,7 @@ import com.example.moeda_estudantil.dto.ProfessorCadastroDTO;
 import com.example.moeda_estudantil.dto.ProfessorCriadoDTO;
 import com.example.moeda_estudantil.dto.ProfessorDashboardDTO;
 import com.example.moeda_estudantil.dto.ProfessorResponseDTO;
+import com.example.moeda_estudantil.service.CreditoSemestralService;
 import com.example.moeda_estudantil.service.ProfessorService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,12 @@ import java.util.Map;
 public class ProfessorController {
 
     private final ProfessorService professorService;
+    private final CreditoSemestralService creditoSemestralService;
 
-    public ProfessorController(ProfessorService professorService) {
+    public ProfessorController(ProfessorService professorService,
+                               CreditoSemestralService creditoSemestralService) {
         this.professorService = professorService;
+        this.creditoSemestralService = creditoSemestralService;
     }
 
     /**
@@ -59,7 +63,7 @@ public class ProfessorController {
      */
     @PostMapping("/credito-semestral")
     public ResponseEntity<Map<String, Object>> aplicarCreditoSemestral() {
-        var professores = professorService.aplicarCreditoSemestralEmLote();
+        var professores = creditoSemestralService.aplicarEmLote();
         return ResponseEntity.ok(Map.of(
                 "mensagem", "Crédito semestral de 1.000 moedas aplicado com sucesso a todos os professores.",
                 "totalProfessoresCreditados", professores.size()
@@ -73,7 +77,7 @@ public class ProfessorController {
 
     @PostMapping("/{id}/credito-semestral")
     public ResponseEntity<Void> creditoSemestral(@PathVariable Long id) {
-        professorService.aplicarCreditoSemestral(id);
+        creditoSemestralService.aplicarParaProfessor(id);
         return ResponseEntity.ok().build();
     }
 
