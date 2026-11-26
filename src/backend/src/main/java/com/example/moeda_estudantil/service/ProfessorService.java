@@ -26,8 +26,6 @@ import com.example.moeda_estudantil.repository.TransacaoRepository;
 import com.example.moeda_estudantil.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -44,7 +42,7 @@ public class ProfessorService {
     private final ProfessorRepository professorRepository;
     private final AlunoRepository alunoRepository;
     private final TransacaoRepository transacaoRepository;
-    private final EmailService emailService;
+    private final NotificacaoService notificacaoService;
     private final UsuarioRepository usuarioRepository;
     private final InstituicaoRepository instituicaoRepository;
     private final DepartamentoRepository departamentoRepository;
@@ -52,14 +50,14 @@ public class ProfessorService {
     public ProfessorService(ProfessorRepository professorRepository,
                             AlunoRepository alunoRepository,
                             TransacaoRepository transacaoRepository,
-                            EmailService emailService,
+                            NotificacaoService notificacaoService,
                             UsuarioRepository usuarioRepository,
                             InstituicaoRepository instituicaoRepository,
                             DepartamentoRepository departamentoRepository) {
         this.professorRepository = professorRepository;
         this.alunoRepository = alunoRepository;
         this.transacaoRepository = transacaoRepository;
-        this.emailService = emailService;
+        this.notificacaoService = notificacaoService;
         this.usuarioRepository = usuarioRepository;
         this.instituicaoRepository = instituicaoRepository;
         this.departamentoRepository = departamentoRepository;
@@ -154,24 +152,7 @@ public class ProfessorService {
         transacaoRepository.save(transacaoAluno);
 
         // Notificar aluno por e-mail após o commit da transação (US05)
-        final String emailAluno = aluno.getEmail();
-        final String nomeAluno = aluno.getNome();
-        final String nomeProfessor = professor.getNome();
-        final Double qtdMoedas = quantidade;
-        final String motivoEnvio = dto.getMotivo();
-
-        executarAposCommit(() -> {
-            try {
-                emailService.enviarAvisoRecebimentoMoedas(
-                        emailAluno,
-                        qtdMoedas,
-                        nomeProfessor,
-                        motivoEnvio
-                );
-            } catch (Exception e) {
-                // Falha no envio nunca desfaz a transação
-            }
-        });
+        notificacaoService.notificarRecebimentoMoedas(aluno, professor, quantidade, dto.getMotivo());
 
         return EnvioMoedasResponseDTO.builder()
                 .transacaoId(salva.getId())
@@ -363,19 +344,6 @@ public class ProfessorService {
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
-
-    private void executarAposCommit(Runnable acao) {
-        if (TransactionSynchronizationManager.isActualTransactionActive()) {
-            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                @Override
-                public void afterCommit() {
-                    acao.run();
-                }
-            });
-        } else {
-            acao.run();
-        }
-    }
 
     private Professor buscarProfessorOuLancar(Long professorId) {
         return professorRepository.findById(professorId)

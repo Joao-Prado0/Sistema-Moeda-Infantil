@@ -50,7 +50,7 @@ class VantagemServiceTest {
     private CupomRepository cupomRepository;
 
     @Mock
-    private EmailService emailService;
+    private NotificacaoService notificacaoService;
 
     @InjectMocks
     private VantagemService vantagemService;
@@ -152,14 +152,8 @@ class VantagemServiceTest {
         assertThat(transacaoCaptor.getValue().getMotivo()).isEqualTo("Resgate: Desconto de 20% no restaurante");
         assertThat(transacaoCaptor.getValue().getQuantidadeMoedas()).isEqualTo(200.0);
 
-        // Verifica que o e-mail foi enviado
-        verify(emailService).enviarCupom(
-                eq("aluno@test.com"),
-                eq("empresa@parceiro.com"),
-                eq("João Teste"),
-                eq("Desconto de 20% no restaurante"),
-                eq(codigoGerado.toString())
-        );
+        // Verifica que a notificação do resgate foi solicitada uma única vez, com o cupom gerado
+        verify(notificacaoService, times(1)).notificarResgate(cupomSalvo);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -184,7 +178,7 @@ class VantagemServiceTest {
         verify(alunoRepository, never()).save(any());
         verify(transacaoRepository, never()).save(any());
         verify(cupomRepository, never()).save(any());
-        verify(emailService, never()).enviarCupom(any(), any(), any(), any(), any());
+        verify(notificacaoService, never()).notificarResgate(any());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -206,7 +200,7 @@ class VantagemServiceTest {
         verify(alunoRepository, never()).findById(any());
         verify(transacaoRepository, never()).save(any());
         verify(cupomRepository, never()).save(any());
-        verify(emailService, never()).enviarCupom(any(), any(), any(), any(), any());
+        verify(notificacaoService, never()).notificarResgate(any());
     }
 }
 
