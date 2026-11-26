@@ -7,12 +7,8 @@ import com.example.moeda_estudantil.exception.ConflitoException;
 import com.example.moeda_estudantil.model.Professor;
 import com.example.moeda_estudantil.model.Transacao;
 import com.example.moeda_estudantil.model.enums.TipoTransacao;
-import com.example.moeda_estudantil.repository.AlunoRepository;
-import com.example.moeda_estudantil.repository.DepartamentoRepository;
-import com.example.moeda_estudantil.repository.InstituicaoRepository;
 import com.example.moeda_estudantil.repository.ProfessorRepository;
 import com.example.moeda_estudantil.repository.TransacaoRepository;
-import com.example.moeda_estudantil.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -40,41 +36,18 @@ class AdminCreditoSemestralTest {
     private ProfessorRepository professorRepository;
 
     @Mock
-    private AlunoRepository alunoRepository;
-
-    @Mock
     private TransacaoRepository transacaoRepository;
 
-    @Mock
-    private EmailService emailService;
-
-    @Mock
-    private UsuarioRepository usuarioRepository;
-
-    @Mock
-    private InstituicaoRepository instituicaoRepository;
-
-    @Mock
-    private DepartamentoRepository departamentoRepository;
-
-    private ProfessorService professorService;
+    private CreditoSemestralService creditoSemestralService;
     private AdminController adminController;
 
     private static final String ADMIN_KEY = "segredo-teste-123";
 
     @BeforeEach
     void setUp() {
-        professorService = new ProfessorService(
-                professorRepository,
-                alunoRepository,
-                transacaoRepository,
-                emailService,
-                usuarioRepository,
-                instituicaoRepository,
-                departamentoRepository
-        );
+        creditoSemestralService = new CreditoSemestralService(professorRepository, transacaoRepository);
 
-        adminController = new AdminController(professorService, ADMIN_KEY);
+        adminController = new AdminController(creditoSemestralService, ADMIN_KEY);
     }
 
     @Test
@@ -115,7 +88,7 @@ class AdminCreditoSemestralTest {
         when(transacaoRepository.existsByTipoAndMotivo(TipoTransacao.CREDITO_SEMESTRAL, "Crédito semestral 2026/2"))
                 .thenReturn(true);
 
-        assertThatThrownBy(() -> professorService.aplicarCreditoSemestralIdempotente("2026/2"))
+        assertThatThrownBy(() -> creditoSemestralService.aplicarParaTodos("2026/2"))
                 .isInstanceOf(ConflitoException.class)
                 .hasMessageContaining("já foi aplicado anteriormente");
 
@@ -133,7 +106,7 @@ class AdminCreditoSemestralTest {
                 .thenReturn(false);
         when(professorRepository.findAll()).thenReturn(List.of(p1, p2));
 
-        int creditados = professorService.aplicarCreditoSemestralIdempotente("2026/1");
+        int creditados = creditoSemestralService.aplicarParaTodos("2026/1");
 
         assertThat(creditados).isEqualTo(2);
         assertThat(p1.getSaldo()).isEqualTo(1200.0);
@@ -157,7 +130,7 @@ class AdminCreditoSemestralTest {
         when(transacaoRepository.existsByTipoAndMotivo(any(), anyString())).thenReturn(false);
         when(professorRepository.findAll()).thenReturn(Collections.emptyList());
 
-        int count = professorService.aplicarCreditoSemestralIdempotente("2026/2");
+        int count = creditoSemestralService.aplicarParaTodos("2026/2");
         assertThat(count).isZero();
     }
 }
