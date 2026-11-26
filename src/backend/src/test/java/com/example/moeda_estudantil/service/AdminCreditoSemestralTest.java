@@ -46,7 +46,7 @@ class AdminCreditoSemestralTest {
     private TransacaoRepository transacaoRepository;
 
     @Mock
-    private EmailService emailService;
+    private NotificacaoService notificacaoService;
 
     @Mock
     private UsuarioRepository usuarioRepository;
@@ -68,7 +68,7 @@ class AdminCreditoSemestralTest {
                 professorRepository,
                 alunoRepository,
                 transacaoRepository,
-                emailService,
+                notificacaoService,
                 usuarioRepository,
                 instituicaoRepository,
                 departamentoRepository
