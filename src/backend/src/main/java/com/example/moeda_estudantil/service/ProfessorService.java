@@ -115,19 +115,11 @@ public class ProfessorService {
 
         double quantidade = dto.getQuantidade();
 
-        if (professor.getSaldo() < quantidade) {
-            throw new RegraNegocioException(
-                    "Saldo insuficiente para realizar o envio. " +
-                    "Saldo disponível: " + professor.getSaldo() + " moedas. " +
-                    "Tentativa de envio: " + quantidade + " moedas.");
-        }
+        // Cada entidade valida e altera o próprio saldo (Especialista na Informação)
+        professor.debitar(quantidade);
+        aluno.creditar(quantidade);
 
-        // Debitar do professor
-        professor.setSaldo(professor.getSaldo() - quantidade);
         professorRepository.save(professor);
-
-        // Creditar no aluno
-        aluno.setSaldo(aluno.getSaldo() + quantidade);
         alunoRepository.save(aluno);
 
         LocalDateTime agora = LocalDateTime.now();
@@ -215,7 +207,7 @@ public class ProfessorService {
 
         LocalDateTime agora = LocalDateTime.now();
         for (Professor professor : professores) {
-            professor.setSaldo(professor.getSaldo() + CREDITO_SEMESTRAL);
+            professor.creditar(CREDITO_SEMESTRAL);
             professorRepository.save(professor);
 
             Transacao transacao = Transacao.builder()
@@ -239,7 +231,7 @@ public class ProfessorService {
     public void aplicarCreditoSemestral(Long professorId) {
         Professor professor = buscarProfessorOuLancar(professorId);
 
-        professor.setSaldo(professor.getSaldo() + CREDITO_SEMESTRAL);
+        professor.creditar(CREDITO_SEMESTRAL);
         professorRepository.save(professor);
 
         transacaoRepository.save(Transacao.builder()

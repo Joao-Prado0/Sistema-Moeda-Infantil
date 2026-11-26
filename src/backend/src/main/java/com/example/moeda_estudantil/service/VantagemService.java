@@ -3,7 +3,6 @@ package com.example.moeda_estudantil.service;
 import com.example.moeda_estudantil.dto.CupomResponseDTO;
 import com.example.moeda_estudantil.dto.VantagemResponseDTO;
 import com.example.moeda_estudantil.exception.RecursoNaoEncontradoException;
-import com.example.moeda_estudantil.exception.RegraNegocioException;
 import com.example.moeda_estudantil.model.Aluno;
 import com.example.moeda_estudantil.model.Cupom;
 import com.example.moeda_estudantil.model.Transacao;
@@ -64,14 +63,8 @@ public class VantagemService {
 
         double custo = vantagem.getCustoMoedas();
 
-        if (aluno.getSaldo() < custo) {
-            throw new RegraNegocioException(
-                    "Saldo insuficiente para resgatar a vantagem. Saldo atual: " +
-                    aluno.getSaldo() + " moedas. Custo da vantagem: " + custo + " moedas.");
-        }
-
-        // Debitar saldo
-        aluno.setSaldo(aluno.getSaldo() - custo);
+        // O aluno é quem conhece o próprio saldo: ele valida e debita (Especialista na Informação)
+        aluno.debitar(custo);
         alunoRepository.save(aluno);
 
         // Criar transação de troca

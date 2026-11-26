@@ -1,5 +1,6 @@
 package com.example.moeda_estudantil.model;
 
+import com.example.moeda_estudantil.exception.RegraNegocioException;
 import com.example.moeda_estudantil.model.enums.PerfilUsuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
@@ -57,6 +58,39 @@ public class Aluno extends Usuario {
         this.endereco = endereco;
         this.instituicao = instituicao;
         this.curso = curso;
+    }
+
+    /**
+     * Credita moedas no saldo do aluno (ex.: bonificação enviada por um professor).
+     */
+    public void creditar(double quantidade) {
+        validarQuantidade(quantidade);
+        this.saldo = this.saldo + quantidade;
+    }
+
+    /**
+     * Debita moedas do saldo do aluno (ex.: resgate de vantagem).
+     *
+     * @throws RegraNegocioException se o saldo for insuficiente
+     */
+    public void debitar(double quantidade) {
+        validarQuantidade(quantidade);
+        if (!possuiSaldo(quantidade)) {
+            throw new RegraNegocioException(
+                    "Saldo insuficiente. Saldo atual: " + this.saldo +
+                    " moedas. Valor solicitado: " + quantidade + " moedas.");
+        }
+        this.saldo = this.saldo - quantidade;
+    }
+
+    public boolean possuiSaldo(double quantidade) {
+        return this.saldo >= quantidade;
+    }
+
+    private void validarQuantidade(double quantidade) {
+        if (quantidade <= 0) {
+            throw new RegraNegocioException("A quantidade de moedas deve ser maior que zero.");
+        }
     }
 }
 
